@@ -13,7 +13,7 @@ import { MAX_DISHES, PREVIEW_DISHES, isWebUrl, type Dish } from "@/lib/dishes";
 
 type Modal = "add" | "collection" | "picked" | "help" | null;
 
-const FOLD_MS = 2600;
+const FOLD_MS = 1700;
 const PULL_MS = 700;
 const RETURN_MS = 600;
 

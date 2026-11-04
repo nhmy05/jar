@@ -63,7 +63,7 @@ svg { flex-shrink: 0; }
 .phase-pulling .levitating-slip, .phase-adding .levitating-slip { animation: slip-hide .4s ease forwards; }
 .phase-returning .levitating-slip { animation: slip-hide .4s ease forwards; }
 .phase-pulling .jar-slips { animation: slips-rustle .6s ease-in-out; transform-box: fill-box; transform-origin: center bottom; }
-.phase-adding .jar-slips { animation: slips-rustle .8s ease-in-out 1.9s; transform-box: fill-box; transform-origin: center bottom; }
+.phase-adding .jar-slips { animation: slips-rustle .55s ease-in-out 1.25s; transform-box: fill-box; transform-origin: center bottom; }
 .jar-sparkles { animation: sparkle-glow 5s ease-in-out infinite; }
 
 .scene-note { position: absolute; font-family: var(--font-handwriting), cursive; font-size: 25px; line-height: 1.1; color: #8a7a4c; }
@@ -91,11 +91,11 @@ svg { flex-shrink: 0; }
 
 /* ---------- a slip folds twice, then drops into the mouth of the jar ---------- */
 .folding-slip { position: absolute; inset: 0; pointer-events: none; perspective: 900px; }
-.folding-sheet { position: absolute; left: 50%; top: -6%; width: 220px; height: 150px; padding: 18px; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1px solid var(--paper-edge); border-radius: 2px; box-shadow: 2px 8px 18px rgba(122,106,63,.16); transform-origin: center; animation: fold-and-drop 2.6s cubic-bezier(.45,0,.2,1) forwards; }
-.folding-name { font-family: var(--font-handwriting), cursive; font-size: 36px; text-align: center; line-height: 1.05; color: #3f3a2c; overflow-wrap: anywhere; animation: fold-name-away 2.6s forwards; }
+.folding-sheet { position: absolute; left: 50%; top: -6%; width: 220px; height: 150px; padding: 18px; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1px solid var(--paper-edge); border-radius: 2px; box-shadow: 2px 8px 18px rgba(122,106,63,.16); transform-origin: center; animation: fold-and-drop 1.7s cubic-bezier(.45,0,.2,1) forwards; }
+.folding-name { font-family: var(--font-handwriting), cursive; font-size: 36px; text-align: center; line-height: 1.05; color: #3f3a2c; overflow-wrap: anywhere; animation: fold-name-away 1.7s forwards; }
 .fold-crease { position: absolute; opacity: 0; background: rgba(150,130,80,.25); }
-.crease-vertical { left: 50%; top: 0; height: 100%; width: 1px; animation: first-crease 2.6s forwards; }
-.crease-horizontal { top: 50%; left: 0; height: 1px; width: 100%; animation: second-crease 2.6s forwards; }
+.crease-vertical { left: 50%; top: 0; height: 100%; width: 1px; animation: first-crease 1.7s forwards; }
+.crease-horizontal { top: 50%; left: 0; height: 1px; width: 100%; animation: second-crease 1.7s forwards; }
 @keyframes fold-name-away { 0%, 26% { opacity: 1; } 38%, 100% { opacity: 0; } }
 @keyframes first-crease { 0%, 22% { opacity: 0; } 32%, 100% { opacity: 1; } }
 @keyframes second-crease { 0%, 42% { opacity: 0; } 52%, 100% { opacity: 1; } }
