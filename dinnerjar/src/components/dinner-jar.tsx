@@ -162,7 +162,7 @@ export function DinnerJar() {
       </section>
 
       <section className="jar-scene" aria-label="Your dinner jar">
-        <div className="scene-note note-left" aria-hidden="true"><span>every dish<br />you’ve loved</span><svg width="110" height="70" viewBox="0 0 110 70" fill="none"><path d="M8 6c-1 40 52 56 92 30m-3 2 7-6-1 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
+        <div className="scene-note note-left" aria-hidden="true"><span>every dish<br />you’ve loved</span><svg width="110" height="70" viewBox="0 0 110 70" fill="none"><path d="M8 6c-1 40 52 56 92 30m-9 .4 9-.4-4.1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
         <div className="scene-note note-right" aria-hidden="true"><svg width="62" height="54" viewBox="0 0 62 54" fill="none"><path d="M56 8C37-1 15 14 19 35m-4-5 4 7 6-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg><span>folded twice,<br />names hidden</span></div>
         <div className="jar-stage">
           <JarIllustration dishes={dishes} phase={phase} onPick={() => void pickDish()} />
