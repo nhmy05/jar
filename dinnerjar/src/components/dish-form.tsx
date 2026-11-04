@@ -39,10 +39,12 @@ async function preparePhoto(file: File): Promise<string> {
   }
 }
 
-export function DishForm({ onSave, slipsLeft }: { onSave: (dish: NewDish) => Promise<void>; slipsLeft: number }) {
-  const [name, setName] = useState("");
-  const [recipeUrl, setRecipeUrl] = useState("");
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+/** Add a new note, or edit one when `initial` is given. */
+export function DishForm({ onSave, initial }: { onSave: (dish: NewDish) => Promise<void>; initial?: { name: string; recipeUrl: string | null; photoUrl: string | null } }) {
+  const editing = !!initial;
+  const [name, setName] = useState(initial?.name ?? "");
+  const [recipeUrl, setRecipeUrl] = useState(initial?.recipeUrl ?? "");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(initial?.photoUrl ?? null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -70,8 +72,7 @@ export function DishForm({ onSave, slipsLeft }: { onSave: (dish: NewDish) => Pro
   }
 
   return <>
-    <h2 id="add-title">Write a new slip</h2>
-    <p className="dialog-description">A dish you’ve cooked and loved. {slipsLeft === 1 ? "Room for 1 more slip." : `Room for ${slipsLeft} more slips.`}</p>
+    <h2 id="add-title" className="add-title">{editing ? "Edit this note." : "One more good idea."}</h2>
     <form className="dish-form" onSubmit={submit} noValidate aria-busy={saving}>
       <div className="field-group">
         <label htmlFor="dish-name">Dish name</label>
@@ -90,7 +91,7 @@ export function DishForm({ onSave, slipsLeft }: { onSave: (dish: NewDish) => Pro
         </button>}
       </div>
       {error && <p id="dish-error" className="form-error" role="alert">{error}</p>}
-      <button type="submit" className="button button-primary submit-dish" disabled={saving || processing}><Icon name={saving ? "refresh" : "plus"} className={saving ? "spin" : ""} size={18} />{saving ? "Folding…" : "Fold it into the jar"}</button>
+      <button type="submit" className="button button-primary submit-dish" disabled={saving || processing}><Icon name={saving ? "refresh" : editing ? "check" : "plus"} className={saving ? "spin" : ""} size={18} />{saving ? (editing ? "Saving…" : "Folding…") : editing ? "Save changes" : "Fold it into the jar"}</button>
     </form>
   </>;
 }

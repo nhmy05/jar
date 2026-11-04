@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/icons";
 
-export function Dialog({ children, labelId, onClose, className = "" }: { children: ReactNode; labelId: string; onClose: () => void; className?: string }) {
+export function Dialog({ children, labelId, onClose, className = "", noScrimFade = false, hideClose = false }: { children: ReactNode; labelId: string; onClose: () => void; className?: string; noScrimFade?: boolean; hideClose?: boolean }) {
   const panel = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
@@ -38,9 +38,9 @@ export function Dialog({ children, labelId, onClose, className = "" }: { childre
     };
   }, []);
 
-  return <div className="modal-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className={`modal-scrim${noScrimFade ? " no-fade" : ""}`} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <div className={`dialog-panel ${className}`} role="dialog" aria-modal="true" aria-labelledby={labelId} tabIndex={-1} ref={panel}>
-      <button className="dialog-close icon-button" onClick={onClose} aria-label="Close dialog"><Icon name="close" size={20} /></button>
+      {!hideClose && <button className="dialog-close icon-button" onClick={onClose} aria-label="Close dialog"><Icon name="close" size={20} /></button>}
       {children}
     </div>
   </div>;
