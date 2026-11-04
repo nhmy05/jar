@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The jar and paper</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; aspect-ratio: 1 / 1">
+  <svg width="0" height="0" aria-hidden="true" style="position: absolute">
+    <defs>
+      <filter id="j-soft" x="-30%" y="-150%" width="160%" height="400%"><feGaussianBlur stdDeviation="14"></feGaussianBlur></filter>
+      <filter id="j-b2" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2"></feGaussianBlur></filter>
+      <filter id="j-b8" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"></feGaussianBlur></filter>
+      <clipPath id="j-notes" clipPathUnits="objectBoundingBox">
+        <path transform="scale(0.0015625)" d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90 Z"></path>
+      </clipPath>
+      <clipPath id="j-body"><path d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90 Z"></path></clipPath>
+      <linearGradient id="j-paper" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#FFFFFF"></stop>
+        <stop offset="60%" stop-color="#FDFCF8"></stop>
+        <stop offset="100%" stop-color="#F0EDE4"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <svg viewBox="0 0 640 640" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible">
+    <ellipse cx="320" cy="622" rx="270" ry="24" fill="#F9DE97" opacity="0.8" filter="url(#j-soft)"></ellipse>
+    <path d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90 Z" fill="#FFFFFF" fill-opacity="0.42"></path>
+    <ellipse cx="320" cy="90" rx="190" ry="22" fill="#FFFDF3" fill-opacity="0.75"></ellipse>
+    <path d="M130 90 A190 22 0 0 1 510 90" fill="none" stroke="#A9926A" stroke-width="2.5"></path>
+    <path d="M144 92 A176 15 0 0 1 496 92" fill="none" stroke="#FFFFFF" stroke-width="5"></path>
+  </svg>
+
+  <div style="position: absolute; inset: 0; clip-path: url(#j-notes)">
+    <sc-for list="{{slips}}" as="s" hint-placeholder-count="32">
+      <div style="position: absolute; left: {{s.left}}%; top: {{s.top}}%; width: {{s.width}}%; transform: rotate({{s.rot}}deg) scaleX({{s.flip}}); filter: drop-shadow(0 1.5px 2px rgba(110,100,70,.3))">
+        <svg viewBox="0 0 100 84" aria-hidden="true" style="display: block; width: 100%; height: auto; overflow: visible">
+          <g stroke="#D9D6CC" stroke-width="0.7" stroke-linejoin="round">
+            <polygon points="{{s.p1}}" fill="#E7E4DA"></polygon>
+            <polygon points="{{s.p2}}" fill="#F5F3EC"></polygon>
+            <polygon points="{{s.p3}}" fill="url(#j-paper)"></polygon>
+          </g>
+        </svg>
+      </div>
+    </sc-for>
+  </div>
+
+  <svg viewBox="0 0 640 640" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none">
+    <g clip-path="url(#j-body)">
+      <path d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90" fill="none" stroke="#C4AC7C" stroke-width="34" opacity="0.32" filter="url(#j-b8)"></path>
+      <path d="M126 186 C210 142 430 142 514 186" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.75" filter="url(#j-b2)"></path>
+      <rect x="0" y="574" width="640" height="40" fill="#FFF3CE" opacity="0.55"></rect>
+    </g>
+    <path d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90" fill="none" stroke="#A9926A" stroke-width="2.8" stroke-linejoin="round"></path>
+    <path d="M78 270 C60 330 62 420 104 486 C88 420 90 332 108 276 Z" fill="#FFFFFF" opacity="0.72"></path>
+    <path d="M130 212 C152 184 180 166 212 154 L220 186 C192 196 170 212 152 236 Z" fill="#FFFFFF" opacity="0.5"></path>
+    <path d="M516 190 C552 226 572 276 574 328 C564 280 542 232 502 198 Z" fill="#FFFFFF" opacity="0.8"></path>
+    <path d="M130 90 A190 22 0 0 0 510 90" fill="none" stroke="#A9926A" stroke-width="10" opacity="0.5"></path>
+    <path d="M130 90 A190 22 0 0 0 510 90" fill="none" stroke="#FFFFFF" stroke-width="6.5"></path>
+    <path d="M136 128 C200 148 440 148 504 128" fill="none" stroke="#A9926A" stroke-width="2" opacity="0.55"></path>
+    <path d="M194 596 C240 628 400 628 446 596" fill="none" stroke="#A9926A" stroke-width="2.6"></path>
+    <path d="M206 596 C250 618 390 618 434 596" fill="none" stroke="#FFFFFF" stroke-width="3.5" opacity="0.85"></path>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"notes":{"editor":"range","min":0,"max":50,"step":1,"default":32},"$preview":{"width":640,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const count = Math.max(0, Math.min(50, this.props.notes ?? 32));
+    return {
+      slips: makeSlips(73, [188,209,224,235,244,251,256,261,264,266,267,268,267,266,264,258,253,243,233,220,206,187,163,127], 562, 172, 66, 110).slice(0, count)
+    };
+  }
+}
+const SHAPES = [
+  { p1: '8,14 12,76 92,66 84,2', p2: '8,14 12,76 97,74 92,14', p3: '8,14 12,76 80,84 74,24' },
+  { p1: '30,12 86,4 99,50 62,60', p2: '8,66 62,60 72,80 16,84', p3: '30,12 86,4 62,60 8,66' },
+  { p1: '16,8 92,2 97,62 20,70', p2: '9,16 86,10 92,70 14,78', p3: '3,26 74,18 82,80 8,84' },
+  { p1: '6,10 92,6 98,58 12,64', p2: '6,10 92,6 90,74 4,78', p3: '6,10 92,6 80,48 14,54' }
+];
+function makeSlips(seed, tab, bottom, top, gapSize, turn) {
+  let s = seed;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const half = (y) => {
+    const p = Math.max(0, Math.min(tab.length - 1, (y - 140) / 20));
+    const a = Math.floor(p), b = Math.min(tab.length - 1, a + 1);
+    return tab[a] + (tab[b] - tab[a]) * (p - a);
+  };
+  const w = 100, h = 84, out = [];
+  for (let y = bottom; y > top; y -= 47) {
+    const room = Math.max(0, 2 * Math.min(half(y - h * 0.35), half(y + h * 0.35)) - w * 0.8);
+    const n = Math.floor(room / gapSize) + 1;
+    const gap = n > 1 ? room / (n - 1) : 0;
+    const row = [];
+    for (let i = 0; i < n; i++) {
+      row.push({
+        left: +(((320 - (n - 1) * gap / 2 + i * gap + (rnd() - 0.5) * 16 - w / 2) / 640) * 100).toFixed(2),
+        top: +(((y + (rnd() - 0.5) * 18 - h / 2) / 640) * 100).toFixed(2),
+        width: +(14.6 + rnd() * 2.4).toFixed(2),
+        rot: Math.round((rnd() - 0.5) * turn),
+        flip: rnd() > 0.5 ? 1 : -1,
+        ...SHAPES[Math.floor(rnd() * SHAPES.length)]
+      });
+    }
+    for (let i = row.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      const t = row[i]; row[i] = row[j]; row[j] = t;
+    }
+    out.push(...row);
+  }
+  return out;
+}
+</script>
+</body>
+</html>

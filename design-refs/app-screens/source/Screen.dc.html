@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screen template</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&amp;family=DM+Serif+Display:ital@0;1&amp;family=Caveat:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; overflow: hidden; width: {{t.w}}px; height: {{t.h}}px; background: #FDFAE9; color: #434735; font-family: 'DM Sans', Arial, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased">
+
+  <sc-if value="{{isMoments}}" hint-placeholder-val="{{ false }}">
+    <div style="box-sizing: border-box; width: 100%; height: 100%; padding: 44px 90px; display: flex; flex-direction: column; gap: 22px">
+      <h2 style="margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 30px; color: #46513A">Adding a dish</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; text-align: center; color: #7D806D">
+        <div>
+          <svg viewBox="0 0 220 200" aria-hidden="true" style="display: block; width: 100%; height: 240px">
+            <rect x="30" y="34" width="160" height="124" fill="#FFFFFF" stroke="#D9D6CC"></rect>
+            <text x="110" y="104" text-anchor="middle" font-family="Caveat, cursive" font-size="23" fill="#5F6043">Mushroom pasta</text>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">Write the dish on a flat note</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 220 200" aria-hidden="true" style="display: block; width: 100%; height: 240px">
+            <rect x="30" y="34" width="80" height="124" fill="#F5F3EC" stroke="#D9D6CC"></rect>
+            <polygon points="110,34 110,158 172,146 178,24" fill="#FFFFFF" stroke="#D9D6CC"></polygon>
+            <path d="M110 34 V158" stroke="#C9C5B8" stroke-width="1.5"></path>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">First fold hides the name</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 100 84" aria-hidden="true" style="display: block; width: 100%; height: 240px; padding: 44px 0; box-sizing: border-box">
+            <g stroke="#D9D6CC" stroke-width="0.7" stroke-linejoin="round">
+              <polygon points="8,14 12,76 92,66 84,2" fill="#E7E4DA"></polygon>
+              <polygon points="8,14 12,76 97,74 92,14" fill="#F5F3EC"></polygon>
+              <polygon points="8,14 12,76 80,84 74,24" fill="#FFFFFF"></polygon>
+            </g>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">Second fold makes a small packet</p>
+        </div>
+        <div>
+          <div style="position: relative; width: 240px; height: 240px; margin: 0 auto">
+            <dc-import name="Jar" notes="18" hint-size="240px,240px"></dc-import>
+            <svg viewBox="0 0 100 84" aria-hidden="true" style="position: absolute; left: 92px; top: -6px; width: 54px; transform: rotate(-16deg)">
+              <g stroke="#C9C5B8" stroke-width="1.2" stroke-linejoin="round">
+                <polygon points="16,8 92,2 97,62 20,70" fill="#E7E4DA"></polygon>
+                <polygon points="9,16 86,10 92,70 14,78" fill="#F5F3EC"></polygon>
+                <polygon points="3,26 74,18 82,80 8,84" fill="#FFFFFF"></polygon>
+              </g>
+            </svg>
+          </div>
+          <p style="margin: 6px 0 0; font-size: 14px">Packet drops straight into the jar</p>
+        </div>
+      </div>
+      <h2 style="margin: 8px 0 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 30px; color: #46513A">Pulling a dish</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; text-align: center; color: #7D806D">
+        <div>
+          <div style="position: relative; width: 240px; height: 240px; margin: 0 auto">
+            <dc-import name="Jar" notes="20" hint-size="240px,240px"></dc-import>
+            <svg viewBox="0 0 100 84" aria-hidden="true" style="position: absolute; left: 94px; top: 2px; width: 54px; transform: rotate(10deg)">
+              <g stroke="#C9C5B8" stroke-width="1.2" stroke-linejoin="round">
+                <polygon points="6,10 92,6 98,58 12,64" fill="#E7E4DA"></polygon>
+                <polygon points="6,10 92,6 90,74 4,78" fill="#F5F3EC"></polygon>
+                <polygon points="6,10 92,6 80,48 14,54" fill="#FFFFFF"></polygon>
+              </g>
+            </svg>
+          </div>
+          <p style="margin: 6px 0 0; font-size: 14px">A random note rises out</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 100 84" aria-hidden="true" style="display: block; width: 100%; height: 240px; padding: 44px 0; box-sizing: border-box">
+            <g stroke="#D9D6CC" stroke-width="0.7" stroke-linejoin="round" transform="rotate(-8 50 42)">
+              <polygon points="30,12 86,4 99,50 62,60" fill="#E7E4DA"></polygon>
+              <polygon points="8,66 62,60 72,80 16,84" fill="#F5F3EC"></polygon>
+              <polygon points="30,12 86,4 62,60 8,66" fill="#FFFFFF"></polygon>
+            </g>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">It floats to the middle</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 220 200" aria-hidden="true" style="display: block; width: 100%; height: 240px">
+            <rect x="110" y="34" width="80" height="124" fill="#FFFFFF" stroke="#D9D6CC"></rect>
+            <polygon points="110,34 110,158 56,148 48,26" fill="#F5F3EC" stroke="#D9D6CC"></polygon>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">It unfolds, one fold at a time</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 220 200" aria-hidden="true" style="display: block; width: 100%; height: 240px">
+            <g transform="rotate(-3 110 96)">
+              <rect x="30" y="34" width="160" height="124" fill="#FFFFFF" stroke="#D9D6CC"></rect>
+              <text x="110" y="106" text-anchor="middle" font-family="Caveat, cursive" font-size="23" font-weight="500" fill="#5F6043">Kimchi fried rice</text>
+            </g>
+          </svg>
+          <p style="margin: 6px 0 0; font-size: 14px">The name appears</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isApp}}" hint-placeholder-val="{{ true }}">
+    <div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; opacity: .16; mix-blend-mode: multiply; background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.24' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
+
+    <header style="position: absolute; left: {{t.side}}px; right: {{t.side}}px; top: 0; height: {{t.headH}}px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(117,120,82,.13)">
+      <a href="#" style="display: inline-flex; align-items: center; gap: {{t.brandGap}}px; font-family: 'DM Serif Display', serif; font-size: {{t.brand}}px; letter-spacing: -0.65px; color: #44563A; text-decoration: none">
+        <svg viewBox="0 0 48 48" width="{{t.logo}}" height="{{t.logo}}" fill="none" stroke="#44563A" aria-hidden="true" style="transform: rotate(-5deg)">
+          <path d="m12 15-3-6 11-5 7 7-8 10" fill="#e9edcd" stroke-width="1.45" stroke-linejoin="round"></path>
+          <path d="m25 10 7-6 9 4-7 12" fill="#f8e6ac" stroke-width="1.45" stroke-linejoin="round"></path>
+          <path d="m19 8 1-4 8 1 1 5" fill="#f5d6bc" stroke-width="1.35" stroke-linejoin="round"></path>
+          <path d="M5 22c0 14 7 21 19 21s19-7 19-21" fill="#f7f6e6" stroke-width="1.65"></path>
+          <ellipse cx="24" cy="22" rx="19" ry="6" stroke-width="1.65"></ellipse>
+          <path d="M12 29c2 5 4 7 7 8M36 14v-4M34 12h4" stroke-width="1.4" stroke-linecap="round"></path>
+        </svg>
+        <span>the dinner bowl<span style="color: #B8A674">.</span></span>
+      </a>
+      <nav aria-label="Main navigation" style="display: flex; align-items: center; gap: 22px">
+        <sc-if value="{{isDesk}}" hint-placeholder-val="{{ true }}">
+          <a href="#" style="display: flex; align-items: center; gap: 11px; color: #7B7E67; font-size: 12px; text-decoration: none">A little about the bowl <span style="font-size: 17px">↗</span></a>
+          <span style="height: 18px; width: 1px; background: #E3E2CC"></span>
+        </sc-if>
+        <button type="button" style="display: flex; align-items: center; justify-content: center; gap: {{t.navGap}}px; padding: {{t.navPad}}; background: rgba(255,255,251,.4); border: 1px solid #DEDFCA; border-radius: 9px; font: 500 {{t.navFont}}px 'DM Sans', sans-serif; color: #434735">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5C9.5 3.6 6.5 3.7 3 4.5V19c3.5-.8 6.5-.8 9 1 2.5-1.8 5.5-1.8 9-1V4.5c-3.5-.8-6.5-.9-9 1Z"></path><path d="M12 5.5V20M6 8h3M6 11h3M15 8h3M15 11h3"></path></svg>
+          My dishes
+          <span style="font-size: {{t.countFont}}px; font-weight: 600; min-width: {{t.countSize}}px; height: {{t.countSize}}px; border-radius: 5px; background: #ECEFDA; color: #657454; display: flex; align-items: center; justify-content: center; padding: 0 4px; margin-left: 3px; box-sizing: border-box">{{notes}}</span>
+        </button>
+      </nav>
+    </header>
+
+    <section style="position: absolute; left: 0; right: 0; top: {{t.heroTop}}px; padding: 0 16px; text-align: center">
+      <p style="margin: 0 0 {{t.eyeGap}}px; font-size: {{t.eyeFont}}px; font-weight: 600; letter-spacing: {{t.eyeTrack}}px; line-height: 15px; color: #7D8864; display: flex; align-items: center; justify-content: center; gap: 9px"><span style="width: 5px; height: 5px; border-radius: 50%; background: #92A074"></span>LESS DECIDING, MORE DELICIOUS</p>
+      <h1 style="margin: 0 auto; max-width: {{t.h1Max}}; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: {{t.h1}}px; line-height: {{t.h1Lead}}; letter-spacing: {{t.h1Track}}px; color: #414A33">Can’t decide? <em style="font-weight: 400; color: #68794F; white-space: nowrap">Ask the jar</em></h1>
+      <p style="margin: {{t.subGap}}px auto 0; max-width: {{t.subMax}}; font-size: {{t.subFont}}px; line-height: {{t.subLead}}; color: #7D806D">Write down dishes you’ve cooked and loved, fold them in,<br>and pull one out whenever you need an idea.</p>
+    </section>
+
+    <sc-if value="{{isDesk}}" hint-placeholder-val="{{ true }}">
+      <svg viewBox="0 0 37 42" width="37" height="42" fill="none" aria-hidden="true" style="position: absolute; left: 285px; top: 166px; transform: rotate(-12deg); color: #B2A46E; opacity: .65"><path d="m19 2 2 13 12 3-13 4-4 14-3-14L2 19l13-4 4-13Z" stroke="currentColor" stroke-width="1.1"></path><path d="m31 30 1 4 4 1-4 1-1 4-1-4-4-1 4-1 1-4Z" fill="currentColor"></path></svg>
+      <div style="position: absolute; left: 215px; top: 407px; transform: rotate(-8deg); font-family: Caveat, cursive; font-size: 25px; line-height: 1.2; color: #858A65">
+        A few favorites.<br>A little serendipity.
+        <svg viewBox="0 0 135 83" width="135" height="83" fill="none" aria-hidden="true" style="display: block; margin: 12px 0 0 55px; transform: rotate(-5deg); color: #9B9E7C"><path d="M10 8c-1 48 65 65 112 33m-3 2 8-6-1 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M30 19c9 7 20 12 33 16" stroke="currentColor" stroke-width=".7" opacity=".3" stroke-linecap="round"></path></svg>
+        <span style="position: absolute; left: -20px; top: 97px; font-size: 30px; color: #9D9567; transform: rotate(-6deg)">♡</span>
+      </div>
+      <div style="position: absolute; left: 1090px; top: 472px; transform: rotate(7deg); font-family: Caveat, cursive; font-size: 26px; line-height: 1.2; color: #858A65">
+        <svg viewBox="0 0 65 57" width="65" height="57" fill="none" aria-hidden="true" style="position: absolute; left: -68px; top: -23px; color: #9EAA87; transform: rotate(8deg)"><path d="M58 10c-19-9-41 6-37 27m-4-5 4 7 6-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        Folded with love.<br>Picked by luck.
+        <svg viewBox="0 0 28 32" width="28" height="32" fill="none" aria-hidden="true" style="display: block; margin: 10px 0 0 122px; color: #B2A26E; transform: rotate(-7deg)"><path d="m13 3 2 10 9 3-9 3-2 10-3-10-8-3 8-3 3-10Z" stroke="currentColor" stroke-width="1.1"></path></svg>
+      </div>
+    </sc-if>
+
+    <div style="position: absolute; left: {{t.jarX}}px; top: {{t.jarY}}px; width: {{t.jarW}}px; height: {{t.jarW}}px">
+      <dc-import name="Jar" notes="{{notes}}" hint-size="100%,100%"></dc-import>
+    </div>
+
+    <p style="position: absolute; left: 50%; top: {{t.pillY}}px; transform: translateX(-50%); margin: 0; display: flex; align-items: center; gap: 5px; white-space: nowrap; font-size: {{t.pillFont}}px; color: #7B8165; letter-spacing: .06px; padding: {{t.pillPad}}; border: 1px solid #E2E3CD; border-radius: 25px; background: rgba(255,253,242,.82); box-shadow: 0 2px 6px rgba(96,100,68,.05)"><span style="width: 5px; height: 5px; border-radius: 50%; background: #99A779; margin-right: 3px"></span><strong style="font-weight: 600; color: #606F4E">{{notes}}</strong> <span>{{noteWord}}, names tucked inside</span></p>
+
+    <div style="position: absolute; left: 0; right: 0; top: {{t.btnY}}px; display: flex; justify-content: center; gap: {{t.btnGap}}px">
+      <button type="button" style="min-width: {{t.addW}}px; min-height: {{t.btnH}}px; display: inline-flex; align-items: center; justify-content: center; gap: {{t.iconGap}}px; padding: 0 {{t.btnPad}}px; border-radius: 9px; border: 1px solid #D9DCC4; background: rgba(255,254,246,.75); color: #596349; font: 600 {{t.btnFont}}px/1.35 'DM Sans', sans-serif; box-shadow: 0 2px 0 rgba(125,133,91,.05)">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        Add a dish
+      </button>
+      <button type="button" style="min-width: {{t.pickW}}px; min-height: {{t.btnH}}px; display: inline-flex; align-items: center; justify-content: center; gap: {{t.iconGap}}px; padding: 0 {{t.btnPad}}px; border-radius: 9px; border: 1px solid #536447; background: #536447; color: #FFFDF2; font: 600 {{t.btnFont}}px/1.35 'DM Sans', sans-serif; box-shadow: 0 3px 0 #425137, 0 6px 13px rgba(75,86,47,.06)">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h3c4 0 6 12 10 12h5M17 14l4 4-4 4M3 18h3c1.5 0 2.7-1.7 4-4M13 9c1-1.8 2-3 4-3h4M17 2l4 4-4 4"></path></svg>
+        Pick a dish
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left: {{t.endGap}}px; opacity: .7"><path d="m12 3 2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3ZM20 2v4M18 4h4"></path></svg>
+      </button>
+    </div>
+    <p style="position: absolute; left: 16px; right: 16px; top: {{t.capY}}px; margin: 0; text-align: center; font-size: {{t.capFont}}px; color: #93947D; letter-spacing: .1px">Names stay tucked away until you pick one.</p>
+
+    <footer style="position: absolute; left: {{t.side}}px; right: {{t.side}}px; bottom: 0; height: 60px; display: flex; align-items: center; justify-content: {{t.footAlign}}; border-top: 1px solid rgba(117,120,82,.13); font-size: {{t.footFont}}px; letter-spacing: .08px; color: #92967D">
+      <span style="display: inline-flex; align-items: center; gap: 8px">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#9AA07D" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 3C10 2 3 8 5 15c2 7 14 6 15-12ZM3 22l13-15M7 17l-1-5M11 13l5 1"></path></svg>
+        Good things, one little note at a time.
+      </span>
+      <sc-if value="{{isDesk}}" hint-placeholder-val="{{ true }}">
+        <span style="display: inline-flex; align-items: center; gap: 8px">Made for the everyday cook.
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9E9E7E" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>
+        </span>
+      </sc-if>
+    </footer>
+
+    <sc-if value="{{hasPopup}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; inset: 0; box-sizing: border-box; padding: {{t.scrimPad}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(57,63,40,.21); backdrop-filter: blur(5px)">
+
+        <sc-if value="{{isAdd}}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-label="Add a dish" style="position: relative; box-sizing: border-box; width: 100%; max-width: 490px; padding: {{t.dlgPad}}; border-radius: {{t.dlgRad}}px; border: 1px solid #FFFEF6; background: #FFFDF4; box-shadow: 0 22px 90px rgba(48,56,31,.17), 0 3px 10px rgba(48,56,31,.04)">
+            <button type="button" aria-label="Close dialog" style="position: absolute; right: {{t.closeAt}}px; top: {{t.closeAt}}px; width: 31px; height: 31px; padding: 0; display: inline-flex; justify-content: center; align-items: center; border: 0; background: transparent; color: #7D846A"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+            <p style="margin: 5px 0 13px; display: flex; align-items: center; gap: 7px; font-size: {{t.formEye}}px; font-weight: 600; letter-spacing: 1.45px; color: #7F8969"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>A NEW LITTLE POSSIBILITY</p>
+            <h2 style="margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: {{t.dlgH}}px; letter-spacing: -.7px; line-height: 1.13; color: #46513A">One more good idea.</h2>
+            <p style="margin: 10px 0 25px; font-size: {{t.dlgDesc}}px; line-height: 1.65; color: #8B8C77">A dish you love. A note for another night.</p>
+            <label for="s-name" style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #656E54">What's the dish?</label>
+            <input id="s-name" type="text" placeholder="e.g. Mom's mushroom pasta" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 11px 13px; margin-bottom: 20px; border: 1px solid #98A878; border-radius: 8px; background: #FFFEFA; box-shadow: 0 0 0 3px #DFE5CE66; font: 400 12px 'DM Sans', sans-serif; color: #556047; outline: none">
+            <label for="s-link" style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #656E54">Recipe link <span style="font-weight: 400; color: #9A9C85; font-size: 10px; margin-left: 5px">optional</span></label>
+            <div style="position: relative; margin-bottom: 20px">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#929A7B" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; top: 14px; left: 13px"><path d="m10 13 4-4M8.5 15.5l-1 1a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5 0m1 3 1-1a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0" transform="translate(2 -1)"></path></svg>
+              <input id="s-link" type="url" placeholder="https://your-favorite-recipe.com" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 11px 13px 11px 39px; border: 1px solid #DEDFCA; border-radius: 8px; background: #FFFEFA; font: 400 12px 'DM Sans', sans-serif; color: #556047">
+            </div>
+            <p style="margin: 0 0 8px; font-size: 12px; font-weight: 600; color: #656E54">A little photo <span style="font-weight: 400; color: #9A9C85; font-size: 10px; margin-left: 5px">optional</span></p>
+            <button type="button" style="box-sizing: border-box; width: 100%; padding: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 13px; border: 1px dashed #CBD1B6; border-radius: 9px; background: #FAFBF1; text-align: left; font-family: 'DM Sans', sans-serif">
+              <span style="width: 39px; height: 39px; flex: none; border-radius: 9px; background: #EDF0DD; color: #859371; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8" cy="8" r="1.5"></circle><path d="m21 15-5-5L6 21M13 14l-3-3-7 7"></path></svg></span>
+              <span style="flex: 1"><strong style="display: block; font-size: 11px; font-weight: 500; color: #717E5C">Add a photo from your gallery</strong><small style="display: block; margin-top: 4px; font-size: 9px; color: #A1A38C">or drop it here · JPG, PNG, WebP</small></span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#A3AE8A" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+            <button type="button" style="width: 100%; min-height: 49px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #536447; border-radius: 9px; background: #536447; color: #FFFDF2; font: 600 13px 'DM Sans', sans-serif; box-shadow: 0 3px 0 #425137, 0 6px 13px rgba(75,86,47,.06)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              Fold it into the bowl
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"></path></svg>
+            </button>
+            <p style="margin: 16px 0 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 9px; color: #979A80"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>A name is all you need. The rest is a little extra.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isPicked}}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-label="Tonight's dish" style="position: relative; box-sizing: border-box; width: 100%; max-width: 435px; padding: 27px {{t.pickPad}}px 8px">
+            <button type="button" aria-label="Close dialog" style="position: absolute; right: 4px; top: -3px; z-index: 5; width: 31px; height: 31px; padding: 0; display: inline-flex; justify-content: center; align-items: center; border: 0; border-radius: 50%; background: #FFFCF0C9; color: #7D846A"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+            <div style="position: relative; min-height: 310px; box-sizing: border-box; padding: 29px 26px 23px; background: #FFFFFF; border: 1px solid rgba(142,125,73,.15); box-shadow: 2px 7px 15px rgba(69,64,34,.12), 0 22px 42px rgba(63,68,42,.07); transform: rotate(-3deg); color: #6E6D4D">
+              <span style="position: absolute; left: 50%; top: -14px; z-index: 2; width: 100px; height: 29px; background: #EEE6BDAD; transform: translateX(-50%) rotate(-5deg)"></span>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 8px; font-weight: 600; letter-spacing: 1.1px; color: #8F8969">
+                <span>TONIGHT'S LITTLE POSSIBILITY</span>
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3ZM20 2v4M18 4h4"></path></svg>
+              </div>
+              <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{ false }}">
+                <div role="img" aria-label="Your photo of the dish" style="height: 170px; margin: 22px 0 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background-color: #F7F0D2; background-image: repeating-linear-gradient(135deg, rgba(160,150,100,.14) 0 8px, transparent 8px 16px); border: 5px solid #FFFDF0BF; box-shadow: 0 2px 3px #776E3B12; font-size: 12px; color: #8F8969">[your photo]</div>
+                <h2 style="margin: 18px 0 14px; text-align: center; font-family: Caveat, cursive; font-weight: 500; font-size: 46px; line-height: 1.05; letter-spacing: -.5px; color: #5F6043">Mushroom pasta</h2>
+                <a href="#" style="display: flex; align-items: center; justify-content: center; gap: 7px; width: fit-content; margin: 0 auto 23px; padding: 3px 0 5px; border-bottom: 1px solid #9A96744D; font-size: 12px; color: #707C56; text-decoration: none">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 13 4-4M8.5 15.5l-1 1a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5 0m1 3 1-1a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0" transform="translate(2 -1)"></path></svg>
+                  Open the recipe
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left: 5px"><path d="M14 3h7v7M21 3 10 14M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"></path></svg>
+                </a>
+              </sc-if>
+              <sc-if value="{{noPhoto}}" hint-placeholder-val="{{ true }}">
+                <h2 style="margin: 41px 0 15px; text-align: center; font-family: Caveat, cursive; font-weight: 500; font-size: {{t.pickH}}px; line-height: 1.05; letter-spacing: -.5px; color: #5F6043">Kimchi fried rice</h2>
+                <div style="display: flex; flex-direction: column; align-items: center; margin: 10px 0 26px; color: #96916D">
+                  <svg viewBox="0 0 110 70" width="94" height="64" fill="none" stroke="currentColor" aria-hidden="true"><ellipse cx="54" cy="37" rx="29" ry="22" stroke-width="1.3"></ellipse><ellipse cx="54" cy="37" rx="22" ry="16" stroke-width="1"></ellipse><path d="m15 15-1 17m-4-17-2 10c-1 7 6 8 7 2l3-11M12 34l-2 24M94 15c-9 10-8 22-2 24l1-24 0 43M39 40c2-9 9-13 16-12 5 1 8 5 8 10-5 2-13 5-18 10M45 49l13-18" stroke-width="1.5" stroke-linecap="round"></path><path d="M32 7h5M34 4v6M75 58h5M77 55v6" stroke-width="1"></path></svg>
+                  <span style="margin-top: 6px; font-family: Caveat, cursive; font-size: 17px">You know the way. Make it your own.</span>
+                </div>
+              </sc-if>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; font-size: 8px; color: #95906B">
+                <span>a familiar favorite, a fresh little nudge.</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(10deg)"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>
+              </div>
+              <span style="position: absolute; bottom: 0; right: 0; width: 23px; height: 23px; background: linear-gradient(135deg, #ffffff05 46%, #fffdf47a 50%, #fffdf4 51%)"></span>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 12px; margin: 30px 9px 0">
+              <button type="button" style="flex: 1; min-height: 49px; padding: 0 17px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 9px; border: 1px solid #D9DCC4; background: #FFFDF4; color: #596349; font: 600 13px 'DM Sans', sans-serif">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4-5 5 5 5M3 9h10a6 6 0 0 1 0 12h-3"></path></svg>
+                Put back
+              </button>
+              <button type="button" style="flex: 1; min-height: 49px; padding: 0 17px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 9px; border: 1px solid #536447; background: #536447; color: #FFFDF2; font: 600 13px 'DM Sans', sans-serif; box-shadow: 0 3px 0 #425137">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h3c4 0 6 12 10 12h5M17 14l4 4-4 4M3 18h3c1.5 0 2.7-1.7 4-4M13 9c1-1.8 2-3 4-3h4M17 2l4 4-4 4"></path></svg>
+                Pick another
+              </button>
+            </div>
+            <p style="margin: 17px 0 4px; text-align: center; font-size: 10px; color: #7D866A">A good idea is always here when you need it.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isDishes}}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-label="My dishes" style="position: relative; box-sizing: border-box; width: 100%; max-width: 665px; padding: {{t.dlgPad}}; border-radius: {{t.dlgRad}}px; border: 1px solid #FFFEF6; background: #FFFDF4; box-shadow: 0 22px 90px rgba(48,56,31,.17), 0 3px 10px rgba(48,56,31,.04)">
+            <button type="button" aria-label="Close dialog" style="position: absolute; right: {{t.closeAt}}px; top: {{t.closeAt}}px; width: 31px; height: 31px; padding: 0; display: inline-flex; justify-content: center; align-items: center; border: 0; background: transparent; color: #7D846A"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+            <p style="margin: 5px 0 13px; display: flex; align-items: center; gap: 7px; font-size: {{t.formEye}}px; font-weight: 600; letter-spacing: 1.45px; color: #7F8969"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5.5C9.5 3.6 6.5 3.7 3 4.5V19c3.5-.8 6.5-.8 9 1 2.5-1.8 5.5-1.8 9-1V4.5c-3.5-.8-6.5-.9-9 1Z"></path><path d="M12 5.5V20"></path></svg>YOUR GOOD-FOOD COLLECTION</p>
+            <h2 style="margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: {{t.dlgH}}px; letter-spacing: -.7px; line-height: 1.13; color: #46513A">Tried, loved, tucked away.</h2>
+            <p style="margin: 10px 0 0; font-size: {{t.dlgDesc}}px; line-height: 1.65; color: #8B8C77">All your little dinner possibilities, in one place.</p>
+            <div style="display: flex; align-items: center; gap: 11px; margin-top: 23px">
+              <div style="position: relative; flex: 1; min-width: 0">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#929A7B" stroke-width="1.65" stroke-linecap="round" aria-hidden="true" style="position: absolute; top: 12px; left: 13px"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+                <input type="search" aria-label="Search your dishes" placeholder="Find a favorite…" style="box-sizing: border-box; width: 100%; height: 41px; padding: 10px 12px 10px 39px; border: 1px solid #DFE1CC; border-radius: 8px; background: #FFFEF9; font: 400 12px 'DM Sans', sans-serif; color: #657153">
+              </div>
+              <button type="button" style="min-height: 41px; padding: 0 16px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 1px solid #536447; border-radius: 9px; background: #536447; color: #FFFDF2; font: 600 12px 'DM Sans', sans-serif; box-shadow: 0 3px 0 #425137"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add a dish</button>
+            </div>
+            <p style="margin: 19px 0 12px; font-size: 10px; color: #949A81">{{notes}} little possibilities</p>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: {{t.gridGap}}px">
+              <sc-for list="{{shown}}" as="d" hint-placeholder-count="6">
+                <button type="button" aria-label="Open {{d.name}}" style="box-sizing: border-box; min-height: {{t.cardH}}px; padding: {{t.cardPad}}; display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: #FFFFFF; border: 1px solid rgba(124,113,74,.12); border-radius: 2px; box-shadow: 1px 2px 3px rgba(84,83,57,.04); transform: rotate({{d.rot}}deg); font-family: 'DM Sans', sans-serif">
+                  <span style="margin: 0 0 16px; font-family: Caveat, cursive; font-size: {{t.cardName}}px; line-height: 1.12; color: #686A4D">{{d.name}}</span>
+                  <span style="margin-top: auto; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 7px; font-size: {{t.cardFoot}}px; color: #80816B">
+                    <span>{{d.note}}</span>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"></path></svg>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+            <p style="margin: 20px 0 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10px; color: #91977E"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4-5 5 5 5M3 9h10a6 6 0 0 1 0 12h-3"></path></svg>Picking a favorite never takes it out of your bowl.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isAbout}}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-label="A little about the bowl" style="position: relative; box-sizing: border-box; width: 100%; max-width: 510px; padding: 34px; border-radius: 20px; border: 1px solid #FFFEF6; background: #FFFDF4; box-shadow: 0 22px 90px rgba(48,56,31,.17), 0 3px 10px rgba(48,56,31,.04)">
+            <button type="button" aria-label="Close dialog" style="position: absolute; right: 15px; top: 15px; width: 31px; height: 31px; padding: 0; display: inline-flex; justify-content: center; align-items: center; border: 0; background: transparent; color: #7D846A"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+            <p style="margin: 5px 0 13px; display: flex; align-items: center; gap: 7px; font-size: 9px; font-weight: 600; letter-spacing: 1.45px; color: #7F8969"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3ZM20 2v4M18 4h4"></path></svg>A LITTLE RITUAL, NOT ANOTHER TO-DO</p>
+            <h2 style="margin: 0; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 35px; letter-spacing: -.7px; line-height: 1.13; color: #46513A">Less thinking.<br>More “that sounds good.”</h2>
+            <p style="margin: 10px 0 0; font-size: 12px; line-height: 1.65; color: #8B8C77">A small home for the meals you already love.</p>
+            <ol style="list-style: none; margin: 26px 0; padding: 0">
+              <li style="display: flex; align-items: flex-start; gap: 17px; padding: 0 0 23px">
+                <span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 7px; background: #EDF0D8; color: #88936D; font-family: Caveat, cursive; font-size: 22px; transform: rotate(-4deg)">01</span>
+                <div><h3 style="margin: 0 0 5px; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 19px; color: #687753">Write a little note.</h3><p style="margin: 0; font-size: 11px; line-height: 1.75; color: #8A9078">Add a dish you've cooked and loved. A photo or recipe link is a lovely little extra.</p></div>
+              </li>
+              <li style="display: flex; align-items: flex-start; gap: 17px; padding: 0 0 23px">
+                <span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 7px; background: #F3E6C6; color: #A29164; font-family: Caveat, cursive; font-size: 22px; transform: rotate(5deg)">02</span>
+                <div><h3 style="margin: 0 0 5px; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 19px; color: #687753">Tuck it in the jar.</h3><p style="margin: 0; font-size: 11px; line-height: 1.75; color: #8A9078">Your note folds twice, so the name stays hidden inside. It's saved here, just for this browser.</p></div>
+              </li>
+              <li style="display: flex; align-items: flex-start; gap: 17px">
+                <span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 7px; background: #E3E9D6; color: #88936D; font-family: Caveat, cursive; font-size: 22px; transform: rotate(-2deg)">03</span>
+                <div><h3 style="margin: 0 0 5px; font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 19px; color: #687753">Let a little luck decide.</h3><p style="margin: 0; font-size: 11px; line-height: 1.75; color: #8A9078">Pick a note for tonight. Put it back or try another. Every favorite stays in the bowl.</p></div>
+              </li>
+            </ol>
+            <div style="display: flex; align-items: flex-start; gap: 11px; padding: 15px; margin: 6px 0 24px; border: 1px solid #E8E8D3; border-radius: 10px; background: #F8F9ED; color: #8D9678">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true" style="margin-top: 2px; flex: none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>
+              <p style="margin: 0; font-size: 10px; line-height: 1.7">We've added 20 little dinner ideas to get you started. Make the bowl your own, one good meal at a time.</p>
+            </div>
+            <button type="button" style="width: 100%; min-height: 49px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid #536447; border-radius: 9px; background: #536447; color: #FFFDF2; font: 600 13px 'DM Sans', sans-serif; box-shadow: 0 3px 0 #425137, 0 6px 13px rgba(75,86,47,.06)">Sounds like a plan<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"></path></svg></button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["home","add","picked","photo","dishes","about","moments"],"default":"home"},"device":{"editor":"enum","options":["desk","phone"],"default":"desk"},"notes":{"editor":"range","min":0,"max":50,"step":1,"default":20},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const view = this.props.view ?? 'home';
+    const device = this.props.device ?? 'desk';
+    const notes = Math.max(0, Math.min(50, Number(this.props.notes ?? 20)));
+    const isDesk = device === 'desk';
+    const t = isDesk
+      ? { w: 1440, h: 900, side: 80, headH: 92, brand: 25, brandGap: 11, logo: 43, navGap: 9, navPad: '9px 12px', navFont: 12, countFont: 10, countSize: 21, heroTop: 122, eyeGap: 15, eyeFont: 10, eyeTrack: 1.9, h1: 60, h1Max: 'none', h1Lead: 1.16, h1Track: -1.95, subGap: 17, subMax: 'none', subFont: 14, subLead: 1.7, jarX: 495, jarY: 256, jarW: 450, looseX: 800, looseY: 636, looseW: 130, floatY: 262, floatW: 100, pillY: 686, pillFont: 11, pillPad: '7px 13px', btnY: 737, btnGap: 13, addW: 157, pickW: 190, btnH: 49, iconGap: 10, btnPad: 24, btnFont: 13, endGap: 12, capY: 802, capFont: 11, footAlign: 'space-between', footFont: 10.5, scrimPad: 24, dlgPad: '32px', dlgRad: 20, closeAt: 15, formEye: 9, dlgH: 33, dlgDesc: 12, pickPad: 17, pickH: 62, gridGap: 14, cardH: 129, cardPad: '23px 18px 14px', cardName: 31, cardFoot: 8 }
+      : { w: 390, h: 844, side: 17, headH: 75, brand: 19, brandGap: 5, logo: 32, navGap: 6, navPad: '7px 8px', navFont: 10, countFont: 9, countSize: 19, heroTop: 109, eyeGap: 16, eyeFont: 8, eyeTrack: 1.4, h1: 41, h1Max: '370px', h1Lead: 1.08, h1Track: -1.4, subGap: 17, subMax: '330px', subFont: 12, subLead: 1.8, jarX: 27, jarY: 286, jarW: 336, looseX: 240, looseY: 560, looseW: 96, floatY: 306, floatW: 76, pillY: 592, pillFont: 8, pillPad: '6px 10px', btnY: 630, btnGap: 11, addW: 140, pickW: 171, btnH: 48, iconGap: 8, btnPad: 18, btnFont: 12, endGap: 8, capY: 694, capFont: 9, footAlign: 'center', footFont: 9, scrimPad: 16, dlgPad: '27px 24px', dlgRad: 16, closeAt: 11, formEye: 8, dlgH: 30, dlgDesc: 11, pickPad: 12, pickH: 55, gridGap: 11, cardH: 118, cardPad: '20px 12px 13px', cardName: 27, cardFoot: 7 };
+    const all = [
+      { name: 'Veggie lasagna', note: 'a tried-and-loved favorite', color: '#F0D8D0', rot: 0.6 },
+      { name: 'Lentil soup', note: 'a tried-and-loved favorite', color: '#DEE3C9', rot: 0 },
+      { name: 'Teriyaki chicken', note: 'a tried-and-loved favorite', color: '#F0D8C3', rot: -0.7 },
+      { name: 'Pesto pasta', note: 'a tried-and-loved favorite', color: '#F4E6B6', rot: 0.6 },
+      { name: 'Bibimbap', note: 'a tried-and-loved favorite', color: '#E6DFEA', rot: 0 },
+      { name: 'Coconut dal', note: 'a tried-and-loved favorite', color: '#DEE3C9', rot: -0.7 }
+    ];
+    return {
+      t, notes, isDesk,
+      noteWord: notes === 1 ? 'folded note' : 'folded notes',
+      isMoments: view === 'moments',
+      isApp: view !== 'moments',
+      hasPopup: ['add', 'picked', 'photo', 'dishes', 'about'].includes(view),
+      isAdd: view === 'add',
+      isPicked: view === 'picked' || view === 'photo',
+      hasPhoto: view === 'photo',
+      noPhoto: view === 'picked',
+      isDishes: view === 'dishes',
+      isAbout: view === 'about',
+      shown: isDesk ? all : all.slice(0, 4)
+    };
+  }
+}
+</script>
+</body>
+</html>
