@@ -36,12 +36,12 @@ export async function POST(request: Request) {
     const jarId = await getJarId();
     const store = await getStore();
     if ((await store.count(jarId)) >= MAX_DISHES) {
-      return NextResponse.json({ error: `The jar is full — it holds ${MAX_DISHES} slips. Take one out to make room.` }, { status: 409 });
+      return NextResponse.json({ error: "The jar is full. Take a note out to make room." }, { status: 409 });
     }
     const dish = await store.add(jarId, input);
     return NextResponse.json({ dish }, { status: 201 });
   } catch (error) {
     console.error("Could not save a dish:", error);
-    return NextResponse.json({ error: "Your slip couldn’t be saved. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Your note couldn’t be saved. Please try again." }, { status: 500 });
   }
 }

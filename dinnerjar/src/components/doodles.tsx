@@ -1,8 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 
-/* Little kitchen doodles scattered over the butter-yellow page. Purely decorative. */
+/* Little kitchen doodles around the headline and the jar. Purely decorative. */
 
 const INK = "#5d4c38";
+const GOLD = "#a8915a";
 const C = { peach: "#ffd2bd", mint: "#cde6c6", butter: "#fbdf86", lilac: "#e4d5f2", pink: "#f9c6cf", cream: "#fffaf0", tomato: "#f7a594" };
 const line = { stroke: INK, strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
@@ -65,31 +66,51 @@ const ART: Record<string, ReactNode> = {
   </>,
   heart: <path d="M32 52S10 38 10 24c0-7 6-12 12-12 5 0 8 3 10 6 2-3 5-6 10-6 6 0 12 5 12 12 0 14-22 28-22 28Z" fill={C.pink} {...line} />,
   sparkle: <path d="m32 8 5 17 17 7-17 5-5 19-5-19-17-5 17-7Z" fill={C.butter} {...line} />,
+  /* the mockup's thin gold outlines */
+  goldSparkle: <>
+    <path d="M28 6c1.5 12 4 16.5 16 19-12 2.5-14.5 7-16 19-1.5-12-4-16.5-16-19 12-2.5 14.5-7 16-19Z" fill="none" stroke={GOLD} strokeWidth="1.6" strokeLinejoin="round" />
+    <path d="M50 46c.6 4 1.5 5.4 5.5 6-4 .6-4.9 2-5.5 6-.6-4-1.5-5.4-5.5-6 4-.6 4.9-2 5.5-6Z" fill="none" stroke={GOLD} strokeWidth="1.3" strokeLinejoin="round" />
+  </>,
+  goldHeart: <path d="M32 50S12 38 12 25c0-6.5 5-11 11-11 4.5 0 7.5 2.5 9 5.5 1.5-3 4.5-5.5 9-5.5 6 0 11 4.5 11 11 0 13-20 25-20 25Z" fill="none" stroke={GOLD} strokeWidth="2.4" strokeLinejoin="round" />,
 };
 
 type Placement = { art: keyof typeof ART; left: string; top: string; size: number; rotate: number; className?: string };
 
-const PLACEMENTS: Placement[] = [
-  { art: "lemon", left: "4%", top: "17%", size: 58, rotate: -12 },
-  { art: "sparkle", left: "13%", top: "9%", size: 22, rotate: 8, className: "doodle-desktop" },
-  { art: "whisk", left: "12%", top: "67%", size: 54, rotate: 24, className: "doodle-desktop" },
-  { art: "heart", left: "19%", top: "44%", size: 20, rotate: -14, className: "doodle-desktop" },
-  { art: "garlic", left: "3%", top: "72%", size: 54, rotate: -6, className: "doodle-desktop" },
-  { art: "sprig", left: "17%", top: "84%", size: 50, rotate: 10, className: "doodle-desktop" },
-  { art: "cherries", left: "88%", top: "15%", size: 54, rotate: 10 },
-  { art: "sparkle", left: "81%", top: "30%", size: 18, rotate: -8, className: "doodle-desktop" },
-  { art: "noodles", left: "86%", top: "44%", size: 66, rotate: -6, className: "doodle-desktop" },
-  { art: "mushroom", left: "78%", top: "62%", size: 48, rotate: 12, className: "doodle-desktop" },
-  { art: "chili", left: "90%", top: "75%", size: 52, rotate: -18, className: "doodle-desktop" },
-  { art: "egg", left: "70%", top: "88%", size: 50, rotate: 8, className: "doodle-desktop" },
-  { art: "tomato", left: "27%", top: "92%", size: 40, rotate: -4, className: "doodle-desktop" },
-  { art: "spoon", left: "22%", top: "30%", size: 40, rotate: -30, className: "doodle-desktop" },
-  { art: "heart", left: "92%", top: "6%", size: 18, rotate: 12, className: "doodle-mobile-only" },
-];
+/*
+ * A mix: the mockup's sparkles and heart, plus a few food doodles kept sparse so the jar stays
+ * the star. They're pinned to what they decorate, not to the page, so they move with it when
+ * the window changes size and never slide over the text or the jar:
+ *   "hero": beside the headline (on a phone, beside "Ask the jar")
+ *   "jar":  beside the jar, measured from its edges (--jar is the jar's size, set on .jar-scene)
+ */
+const GROUPS: Record<"hero" | "jar", Placement[]> = {
+  hero: [
+    { art: "lemon", left: "max(30px, min(6%, calc(50% - 420px)))", top: "34px", size: 58, rotate: -12, className: "doodle-wide" },
+    { art: "cherries", left: "min(calc(100% - 30px), max(94%, calc(50% + 420px)))", top: "150px", size: 54, rotate: 10, className: "doodle-wide" },
+    { art: "sparkle", left: "max(80%, calc(50% + 380px))", top: "92px", size: 30, rotate: 8, className: "doodle-roomy" },
+    { art: "lemon", left: "9%", top: "100px", size: 34, rotate: -12, className: "doodle-phone" },
+    { art: "cherries", left: "91%", top: "52px", size: 34, rotate: 10, className: "doodle-phone" },
+  ],
+  /* around the side notes, which sit halfway between the jar and the page edge */
+  jar: [
+    { art: "goldHeart", left: "calc(25% - var(--jar) / 4 - 50px)", top: "calc(100% - 18px - var(--jar) * .4)", size: 26, rotate: -8, className: "doodle-wide" },
+    { art: "garlic", left: "max(30px, calc(25% - var(--jar) / 4 - 150px))", top: "calc(100% - 18px - var(--jar) * .14)", size: 48, rotate: -6, className: "doodle-roomy" },
+    { art: "goldSparkle", left: "calc(25% - var(--jar) / 4 + 8px)", top: "calc(100% - 18px - var(--jar) * 1.29)", size: 26, rotate: 0, className: "doodle-wide" },
+    { art: "goldSparkle", left: "max(30px, calc(25% - var(--jar) / 4 - 165px))", top: "calc(100% - 18px - var(--jar) * .95)", size: 30, rotate: 0, className: "doodle-roomy" },
+    { art: "goldSparkle", left: "min(calc(100% - 30px), calc(75% + var(--jar) / 4 + 206px))", top: "calc(100% - 18px - var(--jar) * .8)", size: 30, rotate: 0, className: "doodle-roomy" },
+    { art: "goldSparkle", left: "calc(75% + var(--jar) / 4 - 65px)", top: "calc(100% - 18px - var(--jar) * .22)", size: 26, rotate: 0, className: "doodle-wide" },
+    { art: "egg", left: "calc(75% + var(--jar) / 4 + 30px)", top: "calc(100% - 18px - var(--jar) * .98)", size: 44, rotate: 12, className: "doodle-wide" },
+    { art: "mushroom", left: "calc(25% - var(--jar) / 4 + 95px)", top: "calc(100% - 18px - var(--jar) * .13)", size: 46, rotate: -8, className: "doodle-wide" },
+    { art: "whisk", left: "min(calc(100% - 30px), calc(75% + var(--jar) / 4 + 150px))", top: "calc(100% - 18px - var(--jar) * .1)", size: 50, rotate: 24, className: "doodle-roomy" },
+    /* small screens: beside the side notes in the top corners */
+    { art: "goldHeart", left: "22px", top: "108px", size: 20, rotate: -8, className: "doodle-small" },
+    { art: "goldSparkle", left: "calc(100% - 26px)", top: "142px", size: 24, rotate: 0, className: "doodle-small" },
+  ],
+};
 
-export function Doodles() {
-  return <div className="doodles" aria-hidden="true">
-    {PLACEMENTS.map((place, index) => <svg
+export function Doodles({ group }: { group: "hero" | "jar" }) {
+  return <div className={`doodles doodles-${group}`} aria-hidden="true">
+    {GROUPS[group].map((place, index) => <svg
       key={index}
       className={`doodle ${place.className ?? ""}`}
       viewBox="0 0 64 64"
@@ -100,12 +121,10 @@ export function Doodles() {
   </div>;
 }
 
+/* Logo C: the jar outline with a gold heart inside. */
 export function JarLogo() {
-  return <svg className="brand-mark" viewBox="0 0 48 48" width="40" height="40" fill="none" aria-hidden="true">
-    <path d="M17 9a17 17 0 1 0 14 0" fill="#eaf2ec" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    <ellipse cx="24" cy="9" rx="8" ry="2.4" fill="#fffaf0" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M13 37l7-4 1 6Z M22 36l8-3 0 7Z M28 31l7 1-3 6Z M15 30l6 1-2 5Z" fill="#fff" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" />
-    <path d="M12 21c-1 3-1 6 0 9" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-    <path d="M38 6v4M36 8h4" stroke="#c9a94f" strokeWidth="1.3" strokeLinecap="round" />
+  return <svg className="brand-mark" viewBox="0 40 640 600" width="36" height="36" aria-hidden="true">
+    <path d="M130 90 L136 130 C80 160 40 240 40 370 C40 500 140 600 230 610 L410 610 C500 600 600 500 600 370 C600 240 560 160 504 130 L510 90 Z" fill="none" stroke="currentColor" strokeWidth="34" strokeLinejoin="round" />
+    <path d="M320 470 S200 400 200 320 c0-40 30-70 66-70 26 0 44 14 54 32 10-18 28-32 54-32 36 0 66 30 66 70 0 80-120 150-120 150Z" fill="#c9a94f" fillOpacity=".3" stroke="#c9a94f" strokeWidth="26" strokeLinejoin="round" />
   </svg>;
 }

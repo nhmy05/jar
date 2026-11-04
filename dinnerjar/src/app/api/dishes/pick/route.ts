@@ -14,6 +14,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ dish }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Could not pick a dish:", error);
-    return NextResponse.json({ error: "That slip got away! Give it another try." }, { status: 500 });
+    return NextResponse.json({ error: "That note got away! Give it another try." }, { status: 500 });
   }
 }

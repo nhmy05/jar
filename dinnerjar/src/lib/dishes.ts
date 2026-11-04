@@ -5,30 +5,14 @@ export type Dish = {
   recipeUrl: string | null;
 };
 
-/** One jar holds at most this many slips. */
-export const MAX_DISHES = 50;
+/** The jar art is drawn full at this many notes. Past it, adding still works and the jar stays drawn full. Never shown to people. */
+export const JAR_FULL_AT = 50;
 
-export const STARTER_DISHES: { name: string }[] = [
-  { name: "Adobo" },
-  { name: "Pho" },
-  { name: "Tacos" },
-  { name: "Mushroom pasta" },
-  { name: "Kimchi fried rice" },
-  { name: "Shakshuka" },
-  { name: "Coconut dal" },
-  { name: "Dumplings" },
-  { name: "Bibimbap" },
-  { name: "Lentil soup" },
-  { name: "Teriyaki chicken" },
-  { name: "Pesto gnocchi" },
-];
+/** Hidden safety cap so spam on the shared link can't fill free storage. Never shown to people. */
+export const MAX_DISHES = 500;
 
-export const PREVIEW_DISHES: Dish[] = STARTER_DISHES.map((dish, index) => ({
-  ...dish,
-  id: `preview-${index}`,
-  photoUrl: null,
-  recipeUrl: null,
-}));
+/** New jars start empty. */
+export const STARTER_DISHES: { name: string }[] = [];
 
 export function isWebUrl(value: string) {
   try {

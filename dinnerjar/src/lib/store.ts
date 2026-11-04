@@ -12,6 +12,7 @@ export interface DishStore {
   count(jarId: string): Promise<number>;
   add(jarId: string, dish: NewDish): Promise<Dish>;
   remove(jarId: string, dishId: string): Promise<boolean>;
+  update(jarId: string, dishId: string, dish: NewDish): Promise<Dish | null>;
   pick(jarId: string, exceptId: string | null): Promise<Dish | null>;
 }
 
@@ -37,7 +38,7 @@ async function postgresStore(): Promise<DishStore> {
       }
       const newId = await db.transaction(async (tx) => {
         const [jar] = await tx.insert(jars).values({}).returning({ id: jars.id });
-        await tx.insert(dishes).values(STARTER_DISHES.map((dish) => ({ ...dish, jarId: jar.id })));
+        if (STARTER_DISHES.length) await tx.insert(dishes).values(STARTER_DISHES.map((dish) => ({ ...dish, jarId: jar.id })));
         return jar.id;
       });
       return { id: newId, created: true };
@@ -57,6 +58,10 @@ async function postgresStore(): Promise<DishStore> {
     async remove(jarId, dishId) {
       const rows = await db.delete(dishes).where(and(eq(dishes.id, dishId), eq(dishes.jarId, jarId))).returning({ id: dishes.id });
       return rows.length > 0;
+    },
+    async update(jarId, dishId, input) {
+      const [row] = await db.update(dishes).set(input).where(and(eq(dishes.id, dishId), eq(dishes.jarId, jarId))).returning();
+      return row ? toDish(row) : null;
     },
     async pick(jarId, exceptId) {
       let [row] = await db
@@ -124,6 +129,16 @@ function fileStore(): DishStore {
       data[jarId] = before.filter((dish) => dish.id !== dishId);
       await writeFile(data);
       return data[jarId].length !== before.length;
+    },
+    async update(jarId, dishId, input) {
+      const data = await readFile();
+      const list = data[jarId] ?? [];
+      const index = list.findIndex((dish) => dish.id === dishId);
+      if (index < 0) return null;
+      const dish: Dish = { ...list[index], ...input };
+      data[jarId] = list.map((item, i) => (i === index ? dish : item));
+      await writeFile(data);
+      return dish;
     },
     async pick(jarId, exceptId) {
       const all = (await readFile())[jarId] ?? [];

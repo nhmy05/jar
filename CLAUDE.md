@@ -32,6 +32,7 @@ Not tested yet, so check these first:
 - No real-world background like a kitchen or home
 - Everything else matches the prototype: layout, sage green, fonts, grain, footer
 - Main goal is that the jar is the star: big and centered
+- Keep the gentle floating motion on the small background doodles and sparkles (off when the device asks for less motion)
 
 Home page wording, exact:
 - Headline: Can't decide? Ask the jar ("Ask the jar" in green italic)
@@ -51,12 +52,14 @@ Copy timing and bend from `design-refs/slip-fold-motion.html` (open it in a brow
 - One small bounce
 - The fold relaxes open a little, like real paper (about 17 degrees on the top fold). This starts the moment it's let go (1.75s), opens fast at first, then eases out through the landing, bounce and settle (ends 2.9s). Keep the thin shadow in the gap, so the opening shows
 - The study uses a yellow note. The real slip is white
-- Pulling out is this motion run backwards
+- Pulling out (changed 2026-11-04): the note rises out of the jar, folding shut as it's picked up, then unfolds while it grows toward you, ending the size and place of the picked note (about 2.65s). The unfold is the fold played backwards at its real timing
+- Put back: the open note shrinks from the picked card to just above the jar, then folds and drops like adding a dish
 
 ## Accounts and data
 Phase 1 (now):
 - One jar, saved in the cloud. I share its link with friends and they can add dishes. No login
 - Friends can add and pick, but not remove. Only I can remove dishes, using a private owner link with a secret key only I have. The shared link never shows the trash button
+- Anyone with the shared link can edit a note (name, link, photo) by clicking it in My dishes (decided 2026-11-04). Removing stays owner only
 - Put a jar id on every dish from day one, so phase 2 needs no rebuild
 - Photos stay in the database for now, shrunk before upload so storage stays free
 - The jar starts empty. No starter dishes
@@ -101,12 +104,12 @@ Watch for: glass can run slow on old phones, so lower quality automatically on w
    - Picked note: straight, not tilted. Nothing under the name (no plate drawing, no "You know the way"). Keep the mockup's heart icon and the small line at the bottom. No fold lines on the note
    - My dishes popup: small label "YOUR GOOD-FOOD COLLECTION" above the title. 3 columns with a trash button on each card. Search placeholder "Find a favorite…". No line at the bottom
    - How it works popup: steps "Write a note", "Drop it in", "Pull one out". Info box about saving. Button "Got it"
-5. 3D: Three.js (via React Three Fiber), no physics engine. Notes drop to precomputed resting spots, then stay still. Only the jar area is 3D; the rest stays HTML. Keep the flat SVG jar as fallback (no WebGL, weak phones) and as the loading picture. Load 3D after the page shows
+5. Jar: the flat mockup drawing (SVG), not 3D. A 3D jar was tried and dropped. Three.js is used only for the fold motion: the note folds in front of the jar, drops in behind the front glass, lands on its pile spot, then fades into the flat note. Pulling: it rises out, then unfolds while it grows into the picked note. Each note lands in one of 16 natural poses (tipped, angled, folds sprung open, some turned round, like the reference photo of slips in a jar); the pile shows a picture of that same pose (public/notes/), so nothing changes when it lands. Three.js loads after the page shows. No WebGL or reduced motion: skips the motion
 6. Starter dishes: none. The jar starts empty
 7. Picked note: no tape strip, even though the mockup has one
 8. Never show the limit ("of 50", "room for 38 more"). Only show how many dishes are in the jar, e.g. "12 dishes to choose from" or "12 in the jar". 50 is the size the jar art is drawn for: how full it looks. Past 50, adding still works and the jar stays drawn full
 9. Text: make the mockup's tiny text (7-10px) bigger so it reads on a phone
-10. Logo: show me 2-3 jar logo options before picking
+10. Logo: option C, the simple jar outline with a gold heart inside (also the browser tab icon)
 
 ## Design files in `design-refs/`
 These are for looking at and copying from, not app code. Some need the design tool's runtime, so read their code if they don't open properly.

@@ -3,19 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { JarIllustration, type JarPhase } from "@/components/jar-illustration";
+import { topSpot, type JarPhase } from "@/components/jar-illustration";
+import { FOLD_SECONDS, type FoldMotion } from "@/components/folding-note";
+import { PILE } from "@/lib/pile";
+import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
 import { DishForm, type NewDish } from "@/components/dish-form";
 import { DishCollection } from "@/components/dish-collection";
 import { Doodles, JarLogo } from "@/components/doodles";
-import { Icon, PlateDoodle } from "@/components/icons";
-import { MAX_DISHES, PREVIEW_DISHES, isWebUrl, type Dish } from "@/lib/dishes";
+import { Icon } from "@/components/icons";
+import { MAX_DISHES, isWebUrl, type Dish } from "@/lib/dishes";
 
-type Modal = "add" | "collection" | "picked" | "help" | null;
+type Modal = "add" | "edit" | "collection" | "picked" | "help" | null;
 
-const FOLD_MS = 2600;
-const PULL_MS = 1100;
-const RETURN_MS = 950;
+/* if the motion can't run (no WebGL, script failed to load), carry on anyway */
+const MOTION_SAFETY_MS = FOLD_SECONDS * 1000 + 4000;
 
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { cache: "no-store", credentials: "same-origin", ...init });
@@ -25,7 +27,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function DinnerJar() {
-  const [dishes, setDishes] = useState<Dish[]>(PREVIEW_DISHES);
+  const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingDish, setSavingDish] = useState(false);
   const [connectionError, setConnectionError] = useState("");
@@ -34,7 +36,17 @@ export function DinnerJar() {
   const [phase, setPhase] = useState<JarPhase>("idle");
   const [modal, setModal] = useState<Modal>(null);
   const [selected, setSelected] = useState<Dish | null>(null);
-  const [pendingDish, setPendingDish] = useState<Dish | null>(null);
+  /** the note open for editing, from My dishes */
+  const [editing, setEditing] = useState<Dish | null>(null);
+  const [motion, setMotion] = useState<FoldMotion | null>(null);
+  /** the top note is out of the jar: in the air, or open in the picked popup */
+  const [outOfJar, setOutOfJar] = useState(false);
+  /** the picked note just unfolded out of the jar, so its popup shows without its own unfold */
+  const [freshPull, setFreshPull] = useState(false);
+  const afterMotion = useRef<(() => void) | null>(null);
+  const midMotion = useRef<(() => void) | null>(null);
+  /** the popup is open but its note card waits for the flying note to land on it */
+  const [arriving, setArriving] = useState(false);
   const [toast, setToast] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -61,14 +73,28 @@ export function DinnerJar() {
     timers.current.push(setTimeout(callback, delay));
   }
 
+  /** Play the fold motion, then run `then` once (when it ends, or after a safety wait). */
+  function playMotion(mode: FoldMotion["mode"], name: string, spotIndex: number, then: () => void, halfway?: () => void, from?: FoldMotion["from"]) {
+    let ran = false, midRan = false;
+    const mid = () => { if (midRan) return; midRan = true; midMotion.current = null; halfway?.(); };
+    const finish = () => { if (ran) return; ran = true; mid(); afterMotion.current = null; setMotion(null); then(); };
+    afterMotion.current = finish;
+    midMotion.current = mid;
+    setMotion({ mode, name, spot: PILE[spotIndex], from });
+    later(finish, MOTION_SAFETY_MS);
+  }
+
+  useEffect(() => { if (modal !== "edit" && modal !== "collection") setEditing(null); }, [modal]);
+
   function closeModal() {
     if (savingDish) return;
     if (modal === "picked") putBack();
+    else if (modal === "edit") setModal("collection");
     else if (phase === "idle") setModal(null);
   }
 
   async function saveDish(input: NewDish) {
-    if (busy.current) throw new Error("One slip at a time. Give this one a moment.");
+    if (busy.current) throw new Error("One note at a time. Give this one a moment.");
     busy.current = true;
     setSavingDish(true);
     let saved = false;
@@ -79,22 +105,33 @@ export function DinnerJar() {
         body: JSON.stringify(input),
       });
       saved = true;
-      setPendingDish(dish);
       setModal(null);
       setPhase("adding");
       setAnnouncement(`Folding ${dish.name} and dropping it into the jar.`);
-      later(() => {
+      playMotion("drop", dish.name, topSpot(dishes.length + 1), () => {
         setDishes((previous) => [...previous, dish]);
-        setPendingDish(null);
         setPhase("idle");
         busy.current = false;
         setToast(`${dish.name} is in the jar.`);
         setAnnouncement(`${dish.name} has been added to your jar.`);
-      }, FOLD_MS);
+      });
     } finally {
       setSavingDish(false);
       if (!saved) busy.current = false;
     }
+  }
+
+  async function updateDish(dish: Dish, input: NewDish) {
+    const { dish: updated } = await apiRequest<{ dish: Dish }>(`/api/dishes/${dish.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    setDishes((previous) => previous.map((item) => (item.id === updated.id ? updated : item)));
+    if (selected?.id === updated.id) setSelected(updated);
+    setModal("collection");
+    setToast(`${updated.name} is saved.`);
+    setAnnouncement(`Your changes to ${updated.name} are saved.`);
   }
 
   async function removeDish(dish: Dish) {
@@ -119,25 +156,42 @@ export function DinnerJar() {
         body: JSON.stringify({ exceptId: selected?.id || null }),
       });
       setSelected(dish);
-      later(() => {
-        setModal("picked");
+      setOutOfJar(true);
+      playMotion("lift", dish.name, topSpot(dishes.length), () => {
+        setArriving(false);
         setPhase("idle");
         setAnnouncement(`Tonight: ${dish.name}.`);
         busy.current = false;
-      }, PULL_MS);
+      }, () => {
+        /* open the popup while the note unfolds: the background blurs, the card waits */
+        setFreshPull(true);
+        setArriving(true);
+        setModal("picked");
+      });
     } catch (error) {
       setPhase("idle");
-      setActionError(error instanceof Error ? error.message : "That slip got away. Please try again.");
+      setOutOfJar(false);
+      setActionError(error instanceof Error ? error.message : "That note got away. Please try again.");
       busy.current = false;
     }
   }
 
   function putBack() {
     if (!selected || phase !== "idle") return;
+    /* the note starts from where its card is, then shrinks to above the jar */
+    const card = document.querySelector(".picked-dialog .picked-slip")?.getBoundingClientRect();
+    const from = card ? { left: card.left, top: card.top, width: card.width, height: card.height } : undefined;
     setModal(null);
+    /* opened from My dishes: it never left the jar */
+    if (!outOfJar) return;
     setPhase("returning");
+    busy.current = true;
     setAnnouncement(`${selected.name} is folded back into the jar.`);
-    later(() => { setPhase("idle"); }, RETURN_MS);
+    playMotion("return", selected.name, topSpot(dishes.length), () => {
+      setOutOfJar(false);
+      setPhase("idle");
+      busy.current = false;
+    }, undefined, from);
   }
 
   const isBusy = loading || phase !== "idle" || savingDish;
@@ -145,9 +199,8 @@ export function DinnerJar() {
   const isEmpty = !loading && dishes.length === 0;
 
   return <div className="dinner-app">
-    <Doodles />
     <header className="site-header">
-      <Link className="brand" href="/" aria-label="What’s for Dinner? home"><JarLogo /><span>what’s for dinner<span className="brand-period">?</span></span></Link>
+      <Link className="brand" href="/" aria-label="The dinner jar home"><JarLogo /><span>the dinner jar<span className="brand-period">.</span></span></Link>
       <nav className="header-nav" aria-label="Main navigation">
         <button className="help-link" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
         <span className="nav-divider" />
@@ -157,47 +210,44 @@ export function DinnerJar() {
 
     <main className="main-scene">
       <section className="hero" aria-labelledby="hero-title">
-        <h1 id="hero-title">Can’t decide? <em>Ask the jar.</em></h1>
+        <Doodles group="hero" />
+        <h1 id="hero-title">Can’t decide? <em>Ask the jar</em></h1>
         <p>Write down dishes you’ve cooked and loved, fold them in,<br className="desktop-break" /> and pull one out whenever you need an idea.</p>
       </section>
 
       <section className="jar-scene" aria-label="Your dinner jar">
+        <Doodles group="jar" />
         <div className="scene-note note-left" aria-hidden="true"><span>every dish<br />you’ve loved</span><svg width="110" height="70" viewBox="0 0 110 70" fill="none"><path d="M8 6c-1 40 52 56 92 30m-3 2 7-6-1 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
-        <div className="scene-note note-right" aria-hidden="true"><svg width="62" height="54" viewBox="0 0 62 54" fill="none"><path d="M56 8C37-1 15 14 19 35m-4-5 4 7 6-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg><span>folded twice,<br />names hidden</span></div>
+        <div className="scene-note note-right" aria-hidden="true"><svg width="62" height="54" viewBox="0 0 62 54" fill="none"><path d="M56 8C37-1 15 14 19 35m-4-5 4 7 6-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg><span>dishes<br />to try</span></div>
         <div className="jar-stage">
-          <JarIllustration dishes={dishes} phase={phase} onPick={() => void pickDish()} />
-          {phase === "adding" && pendingDish && <div className="folding-slip" key={`fold-${pendingDish.id}`} aria-hidden="true">
-            <div className="folding-sheet"><span className="folding-name">{pendingDish.name}</span><span className="fold-crease crease-vertical" /><span className="fold-crease crease-horizontal" /></div>
-          </div>}
-          {(phase === "pulling" || phase === "returning") && <div className={`flying-slip ${phase === "returning" ? "flying-back" : ""}`} key={phase} aria-hidden="true"><span className="flying-layer" /><span className="flying-corner" /></div>}
+          <JarView dishes={dishes} phase={phase} hideTop={outOfJar} motion={motion} onMotionDone={() => afterMotion.current?.()} onMotionMidway={() => midMotion.current?.()} />
         </div>
-        <div className="jar-count"><strong>{dishes.length}</strong> of {MAX_DISHES} slips in the jar</div>
+        <div className="jar-count">{isEmpty ? "No dishes yet" : <><strong>{dishes.length}</strong> {dishes.length === 1 ? "dish" : "dishes"} to choose from</>}</div>
       </section>
 
       <div className="jar-actions">
         <div className="action-buttons">
           <button className="button button-secondary" onClick={() => setModal("add")} disabled={isBusy || isFull || !!connectionError}><Icon name="plus" size={19} />Add a dish</button>
-          <button className="button button-primary pick-button" onClick={() => void pickDish()} disabled={isBusy || isEmpty || !!connectionError}><Icon name={phase === "pulling" ? "refresh" : "shuffle"} size={19} className={phase === "pulling" ? "spin" : ""} />{phase === "pulling" ? "Reaching in…" : "Pull a slip"}</button>
+          <button className="button button-primary pick-button" onClick={() => void pickDish()} disabled={isBusy || isEmpty || !!connectionError}><Icon name={phase === "pulling" ? "refresh" : "shuffle"} size={19} className={phase === "pulling" ? "spin" : ""} />{phase === "pulling" ? "Reaching in…" : "Pick a dish"}</button>
         </div>
-        <p className="action-caption">{isFull ? "The jar is full. Take a slip out in My dishes to make room." : isEmpty ? "The jar is empty. Add the first dish you’ve cooked." : "Every slip goes back in after you read it."}</p>
+        {(isFull || isEmpty) && <p className="action-caption">{isFull ? "The jar is full. Take a note out in My dishes to make room." : "The jar is empty. Add the first dish you’ve cooked."}</p>}
       </div>
       {connectionError && <div className="connection-error" role="alert"><p>{connectionError}</p><button className="text-button" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Try again <Icon name="refresh" size={14} /></button></div>}
       {actionError && <div className="connection-error" role="alert"><p>{actionError}</p><button className="icon-button" aria-label="Dismiss error" onClick={() => setActionError("")}><Icon name="close" size={16} /></button></div>}
     </main>
 
-    <footer className="site-footer"><span>Saved in this browser as a guest · Google sign-in coming soon</span></footer>
+    <footer className="site-footer"><span>Made to answer the question: What’s for dinner?</span></footer>
     <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 
-    {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} slipsLeft={MAX_DISHES - dishes.length} /></Dialog>}
-    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog"><DishCollection dishes={dishes} onSelect={(dish) => { setSelected(dish); setModal("picked"); }} onAdd={() => setModal("add")} onRemove={removeDish} isFull={isFull} /></Dialog>}
-    {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className="picked-dialog">
+    {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
+    {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade hideClose><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
+    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={removeDish} isFull={isFull} /></Dialog>}
+    {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
-        <span className="picked-crease picked-crease-v" /><span className="picked-crease picked-crease-h" />
         <div className="picked-content">
-          <span className="picked-kicker">tonight, how about…</span>
           {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="340px" /></div>}
           <h2 id="picked-title">{selected.name}</h2>
-          {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer"><Icon name="link" size={16} />Open the recipe<Icon name="external" size={13} /></a> : !selected.photoUrl && <div className="no-recipe"><PlateDoodle /></div>}
+          {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer"><Icon name="link" size={16} />Open the recipe<Icon name="external" size={13} /></a> : null}
         </div>
       </div>
       <div className="picked-actions">
@@ -208,9 +258,9 @@ export function DinnerJar() {
     {modal === "help" && <Dialog key="help" labelId="help-title" onClose={closeModal} className="help-dialog">
       <h2 id="help-title">How the jar works</h2>
       <ol className="help-steps">
-        <li><span className="step-number">1</span><div><h3>Write it on a slip</h3><p>A dish you’ve cooked before. Add a photo from your gallery or a recipe link if you like.</p></div></li>
-        <li><span className="step-number">2</span><div><h3>Fold it, drop it in</h3><p>The slip is folded twice so the name stays hidden. The jar holds up to {MAX_DISHES}.</p></div></li>
-        <li><span className="step-number">3</span><div><h3>Pull one out</h3><p>Unfold it to see tonight’s idea. Put it back or pick another. Slips always go back in the jar.</p></div></li>
+        <li><span className="step-number">1</span><div><h3>Write a note</h3><p>A dish you’ve cooked before. Add a photo from your gallery or a recipe link if you like.</p></div></li>
+        <li><span className="step-number">2</span><div><h3>Drop it in</h3><p>The note is folded twice so the name stays hidden inside.</p></div></li>
+        <li><span className="step-number">3</span><div><h3>Pull one out</h3><p>Unfold it to see tonight’s idea. Put it back or pick another. Notes always go back in the jar.</p></div></li>
       </ol>
       <div className="help-tip"><Icon name="heart" size={17} /><p>You’re using the jar as a guest, so it’s saved in this browser. Signing in with Google to keep your jar everywhere is coming soon.</p></div>
       <button className="button button-primary help-done" onClick={closeModal}>Got it</button>
