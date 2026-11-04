@@ -14,8 +14,8 @@ import { MAX_DISHES, PREVIEW_DISHES, isWebUrl, type Dish } from "@/lib/dishes";
 type Modal = "add" | "collection" | "picked" | "help" | null;
 
 const FOLD_MS = 2600;
-const PULL_MS = 1100;
-const RETURN_MS = 950;
+const PULL_MS = 700;
+const RETURN_MS = 600;
 
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { cache: "no-store", credentials: "same-origin", ...init });
