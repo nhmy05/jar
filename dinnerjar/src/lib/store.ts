@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { STARTER_DISHES, type Dish } from "@/lib/dishes";
+import type { Dish } from "@/lib/dishes";
 
 type NewDish = { name: string; recipeUrl: string | null; photoUrl: string | null };
 
 export interface DishStore {
-  /** Returns the jar id, creating (and seeding) a fresh jar when `id` is missing or unknown. */
-  ensureJar(id: string | null): Promise<{ id: string; created: boolean }>;
+  /** The one shared jar: the oldest jar, created the first time it is needed. */
+  sharedJarId(): Promise<string>;
   list(jarId: string): Promise<Dish[]>;
   count(jarId: string): Promise<number>;
   add(jarId: string, dish: NewDish): Promise<Dish>;
@@ -31,17 +31,11 @@ async function postgresStore(): Promise<DishStore> {
   const { and, asc, count, eq, ne, sql } = await import("drizzle-orm");
 
   return {
-    async ensureJar(id) {
-      if (id) {
-        const [existing] = await db.select({ id: jars.id }).from(jars).where(eq(jars.id, id)).limit(1);
-        if (existing) return { id: existing.id, created: false };
-      }
-      const newId = await db.transaction(async (tx) => {
-        const [jar] = await tx.insert(jars).values({}).returning({ id: jars.id });
-        if (STARTER_DISHES.length) await tx.insert(dishes).values(STARTER_DISHES.map((dish) => ({ ...dish, jarId: jar.id })));
-        return jar.id;
-      });
-      return { id: newId, created: true };
+    async sharedJarId() {
+      const [oldest] = await db.select({ id: jars.id }).from(jars).orderBy(asc(jars.createdAt)).limit(1);
+      if (oldest) return oldest.id;
+      const [jar] = await db.insert(jars).values({}).returning({ id: jars.id });
+      return jar.id;
     },
     async list(jarId) {
       const rows = await db.select().from(dishes).where(eq(dishes.jarId, jarId)).orderBy(asc(dishes.createdAt));
@@ -102,13 +96,14 @@ async function writeFile(data: FileData) {
 
 function fileStore(): DishStore {
   return {
-    async ensureJar(id) {
+    async sharedJarId() {
       const data = await readFile();
-      if (id && data[id]) return { id, created: false };
+      const [first] = Object.keys(data);
+      if (first) return first;
       const newId = randomUUID();
-      data[newId] = STARTER_DISHES.map((dish) => ({ ...dish, id: randomUUID(), photoUrl: null, recipeUrl: null }));
+      data[newId] = [];
       await writeFile(data);
-      return { id: newId, created: true };
+      return newId;
     },
     async list(jarId) {
       return (await readFile())[jarId] ?? [];

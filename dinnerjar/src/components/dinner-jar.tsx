@@ -28,6 +28,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
 export function DinnerJar() {
   const [dishes, setDishes] = useState<Dish[]>([]);
+  const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingDish, setSavingDish] = useState(false);
   const [connectionError, setConnectionError] = useState("");
@@ -57,8 +58,8 @@ export function DinnerJar() {
 
   useEffect(() => {
     const controller = new AbortController();
-    apiRequest<{ dishes: Dish[] }>("/api/dishes", { signal: controller.signal })
-      .then((data) => { setDishes(data.dishes); setConnectionError(""); })
+    apiRequest<{ dishes: Dish[]; isOwner?: boolean }>("/api/dishes", { signal: controller.signal })
+      .then((data) => { setDishes(data.dishes); setIsOwner(!!data.isOwner); setConnectionError(""); })
       .catch((error) => { if (error.name !== "AbortError") setConnectionError(error.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -248,7 +249,7 @@ export function DinnerJar() {
 
     {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
     {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
-    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={removeDish} isFull={isFull} /></Dialog>}
+    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={isOwner ? removeDish : undefined} isFull={isFull} /></Dialog>}
     {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
         <div className="picked-content">

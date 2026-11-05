@@ -9,7 +9,8 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
   dishes: Dish[];
   onSelect: (dish: Dish) => void;
   onAdd: () => void;
-  onRemove: (dish: Dish) => Promise<void>;
+  /** only given to the owner: without it there is no trash button */
+  onRemove?: (dish: Dish) => Promise<void>;
   isFull: boolean;
 }) {
   const [query, setQuery] = useState("");
@@ -21,7 +22,7 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
   async function remove(dish: Dish) {
     setRemovingId(dish.id);
     setError("");
-    try { await onRemove(dish); setConfirmId(null); }
+    try { await onRemove?.(dish); setConfirmId(null); }
     catch (problem) { setError(problem instanceof Error ? problem.message : "Couldn’t take that note out."); }
     finally { setRemovingId(null); }
   }
@@ -37,7 +38,7 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
     {query && <div className="collection-subheading"><span>{filtered.length} {filtered.length === 1 ? "match" : "matches"}</span><button className="text-button" onClick={() => setQuery("")}>Clear search</button></div>}
     <div className="collection-grid">
       {filtered.map((dish) => <div className="collection-slip" key={dish.id}>
-        {confirmId === dish.id ? <div className="slip-confirm">
+        {onRemove && confirmId === dish.id ? <div className="slip-confirm">
           <span>Take <strong>{dish.name}</strong> out of the jar for good?</span>
           <div><button className="text-button" onClick={() => setConfirmId(null)} disabled={removingId === dish.id}>Keep it</button><button className="button button-secondary button-small danger" onClick={() => void remove(dish)} disabled={removingId === dish.id}>{removingId === dish.id ? "Removing…" : "Take out"}</button></div>
         </div> : <>
@@ -46,7 +47,7 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
             {dish.photoUrl && <span className="collection-photo"><Image src={dish.photoUrl} alt="" width={260} height={120} unoptimized /></span>}
             {dish.recipeUrl && <span className="collection-slip-meta"><Icon name="link" size={12} /> recipe link</span>}
           </button>
-          <button className="icon-button slip-remove" onClick={() => setConfirmId(dish.id)} aria-label={`Take ${dish.name} out of the jar`}><Icon name="trash" size={15} /></button>
+          {onRemove && <button className="icon-button slip-remove" onClick={() => setConfirmId(dish.id)} aria-label={`Take ${dish.name} out of the jar`}><Icon name="trash" size={15} /></button>}
         </>}
       </div>)}
       {filtered.length === 0 && <div className="collection-empty">{dishes.length === 0 ? <><h3>The jar is empty.</h3><p>Add a dish you’ve cooked to get started.</p></> : <><h3>No note by that name.</h3><button className="text-button" onClick={() => setQuery("")}>Show all my dishes</button></>}</div>}

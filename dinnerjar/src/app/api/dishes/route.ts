@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getJarId } from "@/lib/bowl";
 import { MAX_DISHES, validateDishInput } from "@/lib/dishes";
+import { isOwner } from "@/lib/owner";
 import { getStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export async function GET() {
   try {
     const jarId = await getJarId();
     const dishes = await (await getStore()).list(jarId);
-    return NextResponse.json({ dishes }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ dishes, isOwner: await isOwner() }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Could not load the jar:", error);
     return NextResponse.json({ error: "We couldn’t open your jar. Please try again in a moment." }, { status: 500 });

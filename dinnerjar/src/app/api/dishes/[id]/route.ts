@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { getJarId } from "@/lib/bowl";
 import { validateDishInput } from "@/lib/dishes";
+import { isOwner } from "@/lib/owner";
 import { getStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await isOwner())) return NextResponse.json({ error: "Only the jar’s owner can take notes out." }, { status: 403 });
     const { id } = await params;
     if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: "That note isn’t in your jar." }, { status: 404 });
     const removed = await (await getStore()).remove(await getJarId(), id);
