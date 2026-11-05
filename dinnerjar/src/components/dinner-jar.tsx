@@ -77,7 +77,7 @@ export function DinnerJar() {
   }
 
   /** Play the fold motion, then run `then` once (when it ends, or after a safety wait). */
-  function playMotion(mode: FoldMotion["mode"], name: string, spotIndex: number, then: () => void, halfway?: () => void, from?: FoldMotion["from"], photoUrl?: string | null, onReady?: () => void) {
+  function playMotion(mode: FoldMotion["mode"], name: string, spotIndex: number, then: () => void, halfway?: () => void, from?: FoldMotion["from"], photoUrl?: string | null, onReady?: () => void, hasLink?: boolean) {
     let ran = false, midRan = false, readyRan = false;
     const ready = () => { if (readyRan) return; readyRan = true; readyMotion.current = null; onReady?.(); };
     const mid = () => { if (midRan) return; midRan = true; midMotion.current = null; halfway?.(); };
@@ -85,7 +85,7 @@ export function DinnerJar() {
     afterMotion.current = finish;
     midMotion.current = mid;
     readyMotion.current = ready;
-    setMotion({ mode, name, photoUrl, spot: PILE[spotIndex], from });
+    setMotion({ mode, name, photoUrl, hasLink, spot: PILE[spotIndex], from });
     later(finish, MOTION_SAFETY_MS);
   }
 
@@ -174,7 +174,7 @@ export function DinnerJar() {
         setFreshPull(true);
         setArriving(true);
         setModal("picked");
-      }, undefined, dish.photoUrl, () => setOutOfJar(true));
+      }, undefined, dish.photoUrl, () => setOutOfJar(true), !!dish.recipeUrl && isWebUrl(dish.recipeUrl));
     } catch (error) {
       setPhase("idle");
       setOutOfJar(false);
@@ -197,7 +197,7 @@ export function DinnerJar() {
       setOutOfJar(false);
       setPhase("idle");
       busy.current = false;
-    }, undefined, from, selected.photoUrl, () => setModal(null));
+    }, undefined, from, selected.photoUrl, () => setModal(null), !!selected.recipeUrl && isWebUrl(selected.recipeUrl));
   }
 
   const isBusy = loading || phase !== "idle" || savingDish;
@@ -252,7 +252,7 @@ export function DinnerJar() {
     {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
         <div className="picked-content">
-          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="480px" /></div>}
+          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="560px" /></div>}
           <div className="picked-caption">
             <h2 id="picked-title">{selected.name}</h2>
             {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">Open the recipe<Icon name="external" size={13} /></a> : null}

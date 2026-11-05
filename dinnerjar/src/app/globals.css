@@ -179,9 +179,9 @@ svg { flex-shrink: 0; }
 
 /* the picked slip unfolds: one fold, then the other */
 .modal-scrim:has(.picked-dialog) { background: rgba(57,63,40,.34); }
-.picked-dialog { background: transparent; border: 0; box-shadow: none; width: min(488px, calc((100dvh - 200px) / 1.05 + 28px)); padding: 24px 14px 8px; overflow: visible; }
+.picked-dialog { background: transparent; border: 0; box-shadow: none; width: min(588px, calc((100dvh - 200px) / .733 + 28px)); padding: 24px 14px 8px; overflow: visible; }
 .picked-dialog .dialog-close { right: 2px; top: -6px; background: #fffcf0; box-shadow: 0 2px 6px rgba(48,56,31,.15); }
-.picked-slip { position: relative; aspect-ratio: 1 / 1.05; width: 100%; display: flex; background: var(--note); border: 1px solid rgba(142,125,73,.15); box-shadow: 2px 7px 15px rgba(69,64,34,.12), 0 22px 42px rgba(63,68,42,.07); transform: none; transform-origin: center; animation: unfold-slip .9s cubic-bezier(.3,.7,.2,1) both; }
+.picked-slip { position: relative; aspect-ratio: 3 / 2.2; width: 100%; display: flex; background: var(--note); border: 1px solid rgba(142,125,73,.15); box-shadow: 2px 7px 15px rgba(69,64,34,.12), 0 22px 42px rgba(63,68,42,.07); transform: none; transform-origin: center; animation: unfold-slip .9s cubic-bezier(.3,.7,.2,1) both; }
 .picked-content { position: relative; flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 0; text-align: center; animation: picked-content-in .9s ease both; }
 .picked-footer { position: absolute; left: 20px; right: 18px; bottom: 14px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; font-size: 12px; color: var(--ink-soft); animation: picked-content-in .9s ease both; }
 .picked-footer > svg { color: #8a7a4c; }
@@ -195,12 +195,12 @@ svg { flex-shrink: 0; }
 .fold-overlay { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
 .fold-overlay canvas { display: block; width: 100% !important; height: 100% !important; filter: drop-shadow(0 1px 3px rgba(110,100,70,.16)); }
 .picked-slip h2 { font-family: var(--font-handwriting), cursive; font-size: 40px; line-height: 1.15; margin: 10px 0 14px; color: #2f2b20; font-weight: 600; letter-spacing: -.5px; overflow-wrap: anywhere; }
-.picked-photo { position: relative; width: 100%; height: 72%; flex: none; overflow: hidden; background: #f1ede0; }
+.picked-photo { position: relative; width: 100%; height: 76%; flex: none; overflow: hidden; background: #f1ede0; }
 .picked-photo img { object-fit: cover; }
-.picked-caption { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 24px; text-align: center; }
-.picked-caption h2 { margin: 0; font-size: 46px; }
-.picked-photo + .picked-caption h2 { font-size: 36px; }
-.picked-caption .recipe-link { margin-top: 8px; }
+.picked-caption { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 24px; text-align: center; }
+.picked-caption h2 { margin: 0; font-size: 52px; }
+.picked-photo + .picked-caption h2 { font-size: 34px; }
+.picked-caption .recipe-link { margin-top: 4px; padding: 2px 0; }
 .recipe-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 4px 0; border-bottom: 1.5px solid #44563a; font-size: 13.5px; font-weight: 600; color: #44563a; transition: color .2s; }
 .recipe-link:hover { color: var(--green-dark); }
 .picked-actions { display: flex; gap: 12px; justify-content: center; margin: 26px 6px 0; }

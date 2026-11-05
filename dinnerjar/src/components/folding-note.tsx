@@ -88,42 +88,60 @@ function plainPaper() {
   return canvas;
 }
 
-function writeName(name: string, photo: HTMLImageElement | null = null) {
+function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false) {
   const canvas = document.createElement("canvas");
   canvas.width = 1200; canvas.height = 880;
   const g = canvas.getContext("2d")!;
   paperEdge(g, canvas.width, canvas.height);
   const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
+  /* same layout as the picked card (card is ~560px wide, this canvas 1200 wide: x2.14).
+     With a photo: photo fills the top 76%, name and link centred below. Without: name centred. */
+  const S = 1200 / 560;
+  const photoH = withPhoto ? Math.round(canvas.height * 0.76) : 0;
+  if (photo && photo.naturalWidth) {
+    /* cover fit, like the card */
+    const sc = Math.max(canvas.width / photo.naturalWidth, photoH / photo.naturalHeight);
+    const dw = photo.naturalWidth * sc, dh = photo.naturalHeight * sc;
+    g.save();
+    g.beginPath(); g.rect(0, 0, canvas.width, photoH); g.clip();
+    g.drawImage(photo, (canvas.width - dw) / 2, (photoH - dh) / 2, dw, dh);
+    g.restore();
+  } else if (withPhoto) {
+    g.fillStyle = "#f1ede0"; g.fillRect(0, 0, canvas.width, photoH);
+  }
   g.fillStyle = "#2f2b20";  // same ink as the picked note
   g.textAlign = "center";
   g.textBaseline = "middle";
-  /* fit on one line, or wrap to two */
-  let size = 124;
+  const maxW = (560 - 48) * S;
+  let size = Math.round((withPhoto ? 34 : 52) * S);
+  const minSize = withPhoto ? 40 : 56;
   const words = name.split(" ");
   let lines = [name];
   g.font = `600 ${size}px ${family}`;
-  while (g.measureText(name).width > 1040 && size > 84) { size -= 8; g.font = `600 ${size}px ${family}`; }
-  if (g.measureText(name).width > 1040 && words.length > 1) {
+  while (g.measureText(name).width > maxW && size > minSize) { size -= 4; g.font = `600 ${size}px ${family}`; }
+  if (g.measureText(name).width > maxW && words.length > 1) {
     let best = 1, bestW = Infinity;
     for (let i = 1; i < words.length; i++) {
       const w = Math.max(g.measureText(words.slice(0, i).join(" ")).width, g.measureText(words.slice(i).join(" ")).width);
       if (w < bestW) { bestW = w; best = i; }
     }
     lines = [words.slice(0, best).join(" "), words.slice(best).join(" ")];
-    while (bestW > 1040 && size > 56) { size -= 6; g.font = `600 ${size}px ${family}`; bestW = Math.max(...lines.map((l) => g.measureText(l).width)); }
+    while (bestW > maxW && size > minSize) { size -= 4; g.font = `600 ${size}px ${family}`; bestW = Math.max(...lines.map((l) => g.measureText(l).width)); }
   }
-  const lineH = size * 1.05;
-  /* with a photo, the name moves up and the photo sits under it, like the picked note */
-  const midY = photo ? 214 : canvas.height / 2;
-  lines.forEach((line, i) => g.fillText(line, canvas.width / 2, midY + (i - (lines.length - 1) / 2) * lineH, 1100));
-  if (photo && photo.naturalWidth) {
-    const bx = 77, by = 315, bw = 1046, bh = 459;   // same spot as the picked card
-    /* the whole photo, never cropped: fitted inside the box and centred */
-    const sc = Math.min(bw / photo.naturalWidth, bh / photo.naturalHeight);
-    const dw = photo.naturalWidth * sc, dh = photo.naturalHeight * sc;
-    g.save();
-    g.drawImage(photo, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
-    g.restore();
+  const lineH = size * 1.15;
+  const linkSize = 13.5 * S, linkGap = (withPhoto ? 4 : 4) * S + 4 * S;
+  const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
+  const areaTop = photoH, areaH = canvas.height - photoH;
+  const top = areaTop + (areaH - textH) / 2;
+  lines.forEach((line, i) => g.fillText(line, canvas.width / 2, top + lineH * (i + 0.5), 1100));
+  if (hasLink) {
+    g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
+    g.fillStyle = "#44563a";
+    const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
+    const label = "Open the recipe";
+    g.fillText(label, canvas.width / 2 - 8 * S, y);
+    const w = g.measureText(label).width + 20 * S;
+    g.fillRect(canvas.width / 2 - 8 * S - w / 2 + 10 * S, y + linkSize * 0.75, w, 1.5 * S);
   }
   return canvas;
 }
@@ -170,9 +188,9 @@ function addLights(scene: THREE.Scene) {
   return set;
 }
 
-function makeNote(name: string, photoUrl: string | null = null) {
+function makeNote(name: string, photoUrl: string | null = null, hasLink = false) {
   let photo: HTMLImageElement | null = null;
-  const nameCanvas = writeName(name);
+  const nameCanvas = writeName(name, null, hasLink, !!photoUrl);
   const frontTex = new THREE.CanvasTexture(nameCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
   frontTex.anisotropy = 8;
@@ -211,7 +229,7 @@ function makeNote(name: string, photoUrl: string | null = null) {
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, !!photoUrl), 0, 0);
     frontTex.needsUpdate = true;
   }
 
@@ -256,7 +274,7 @@ export function renderLandedNote(poseIndex: number, px = 480) {
 /** A pile spot, in the jar's 640 box: center, width, and which of NOTE_POSES it lands in. */
 export type Spot = { x: number; y: number; width: number; pose: number };
 /** drop: add a dish. lift: pull one out. return: put the picked one back, starting from its card. */
-export type FoldMotion = { mode: "drop" | "lift" | "return"; name: string; photoUrl?: string | null; spot: Spot; from?: { left: number; top: number; width: number; height: number } };
+export type FoldMotion = { mode: "drop" | "lift" | "return"; name: string; photoUrl?: string | null; hasLink?: boolean; spot: Spot; from?: { left: number; top: number; width: number; height: number } };
 /** Putting back: the open note shrinks from its card to just above the jar, then the fold and drop play. */
 const SHRINK_SECONDS = 0.7;
 /** How much faster picking and putting back play than adding (with QUICK_OPEN: lift ≈ 1s, put back ≈ 1.6s). */
@@ -312,7 +330,7 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
     camera.lookAt(0, 4.5, 0);
     const setLight = addLights(scene);
 
-    const note = makeNote(motion.name, motion.photoUrl ?? null);
+    const note = makeNote(motion.name, motion.photoUrl ?? null, !!motion.hasLink);
     scene.add(note.turn);
 
     /* held in the middle, above the jar's opening, while it's written and folded; then let go,
@@ -399,7 +417,8 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
       const f = jarFrame();
       const card = document.querySelector(".picked-dialog .picked-slip")?.getBoundingClientRect();
       if (card && card.width > 0) return fromRect(card);
-      const k = Math.min(392, window.innerWidth - 24) / (W * f.ppu);
+      const width = Math.min(560, (window.innerHeight - 200) / (H / W), window.innerWidth - 12 * 2);
+      const k = width / (W * f.ppu);
       return { x: 0, y: -0.3 + (f.bottom - window.innerHeight / 2) / f.ppu, k };
     }
 
