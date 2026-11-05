@@ -211,7 +211,7 @@ export function DinnerJar() {
     <main className="main-scene">
       <section className="hero" aria-labelledby="hero-title">
         <Doodles group="hero" />
-        <h1 id="hero-title">Can’t decide? <em>Ask the jar</em></h1>
+        <h1 id="hero-title">Can’t decide? <em>Ask the jar!</em></h1>
         <p>Write down dishes you’ve cooked and loved, fold them in,<br className="desktop-break" /> and pull one out whenever you need an idea.</p>
       </section>
 
