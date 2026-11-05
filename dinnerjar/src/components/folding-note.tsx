@@ -88,7 +88,7 @@ function plainPaper() {
   return canvas;
 }
 
-function writeName(name: string) {
+function writeName(name: string, photo: HTMLImageElement | null = null) {
   const canvas = document.createElement("canvas");
   canvas.width = 1200; canvas.height = 880;
   const g = canvas.getContext("2d")!;
@@ -113,7 +113,18 @@ function writeName(name: string) {
     while (bestW > 1040 && size > 56) { size -= 6; g.font = `600 ${size}px ${family}`; bestW = Math.max(...lines.map((l) => g.measureText(l).width)); }
   }
   const lineH = size * 1.05;
-  lines.forEach((line, i) => g.fillText(line, canvas.width / 2, canvas.height / 2 + (i - (lines.length - 1) / 2) * lineH, 1100));
+  /* with a photo, the name moves up and the photo sits under it, like the picked note */
+  const midY = photo ? 214 : canvas.height / 2;
+  lines.forEach((line, i) => g.fillText(line, canvas.width / 2, midY + (i - (lines.length - 1) / 2) * lineH, 1100));
+  if (photo && photo.naturalWidth) {
+    const bx = 77, by = 315, bw = 1046, bh = 459;   // same spot as the picked card
+    /* the whole photo, never cropped: fitted inside the box and centred */
+    const sc = Math.min(bw / photo.naturalWidth, bh / photo.naturalHeight);
+    const dw = photo.naturalWidth * sc, dh = photo.naturalHeight * sc;
+    g.save();
+    g.drawImage(photo, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
+    g.restore();
+  }
   return canvas;
 }
 
@@ -142,17 +153,25 @@ function addLights(scene: THREE.Scene) {
   fill.position.set(1.5, -0.5, 2);
   scene.add(fill);
   /** 0 = air, 1 = rest */
-  const set = (m: number) => {
-    hemi.intensity = lerp(AIR.sky, REST.sky, m);
-    hemi.groundColor.copy(AIR.ground).lerp(REST.ground, m);
-    key.intensity = lerp(AIR.key, REST.key, m);
-    fill.intensity = lerp(AIR.fill, REST.fill, m);
+  /* `flat` (0..1) eases to a light that shows the paper exactly as drawn: no glow, no shade.
+     A flat note facing you then looks the same as the picked card it lands on. */
+  const white = new THREE.Color(0xffffff), glow = new THREE.Color(0x383328);
+  const set = (m: number, flat = 0) => {
+    hemi.intensity = lerp(lerp(AIR.sky, REST.sky, m), PI, flat);
+    hemi.groundColor.copy(AIR.ground).lerp(REST.ground, m).lerp(white, flat);
+    key.intensity = lerp(lerp(AIR.key, REST.key, m), 0, flat);
+    fill.intensity = lerp(lerp(AIR.fill, REST.fill, m), 0, flat);
+    scene.traverse((o) => {
+      const mat = (o as THREE.Mesh).material as THREE.MeshLambertMaterial | undefined;
+      if (mat && mat.emissive) mat.emissive.copy(glow).multiplyScalar(1 - flat);
+    });
   };
   set(1);
   return set;
 }
 
-function makeNote(name: string) {
+function makeNote(name: string, photoUrl: string | null = null) {
+  let photo: HTMLImageElement | null = null;
   const nameCanvas = writeName(name);
   const frontTex = new THREE.CanvasTexture(nameCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
@@ -192,8 +211,14 @@ function makeNote(name: string) {
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo), 0, 0);
     frontTex.needsUpdate = true;
+  }
+
+  if (photoUrl) {
+    const img = new Image();
+    img.onload = () => { photo = img; redraw(); };
+    img.src = photoUrl;
   }
 
   function dispose() { geo.dispose(); frontTex.dispose(); backTex.dispose(); frontMat.dispose(); backMat.dispose(); }
@@ -231,13 +256,21 @@ export function renderLandedNote(poseIndex: number, px = 480) {
 /** A pile spot, in the jar's 640 box: center, width, and which of NOTE_POSES it lands in. */
 export type Spot = { x: number; y: number; width: number; pose: number };
 /** drop: add a dish. lift: pull one out. return: put the picked one back, starting from its card. */
-export type FoldMotion = { mode: "drop" | "lift" | "return"; name: string; spot: Spot; from?: { left: number; top: number; width: number; height: number } };
+export type FoldMotion = { mode: "drop" | "lift" | "return"; name: string; photoUrl?: string | null; spot: Spot; from?: { left: number; top: number; width: number; height: number } };
 /** Putting back: the open note shrinks from its card to just above the jar, then the fold and drop play. */
 const SHRINK_SECONDS = 0.7;
 /** How much faster picking and putting back play than adding (with QUICK_OPEN: lift ≈ 1s, put back ≈ 1.6s). */
 const QUICK = 2;
+/** adding a dish plays this much faster than the study (3.3s → about 1.3s) */
+const ADD_SPEED = 2.6;
 /** Faster still for the unfold-and-grow when picking, and the shrink-and-fold when putting back. */
 const QUICK_OPEN = 3;
+/** The fold-and-drop when putting back (about 1.4s at QUICK, 0.5s at this rate). */
+const PUT_BACK_DROP = 3.1;
+/** Putting back: the fold after the shrink. */
+const PUT_BACK_FOLD = 3.7;
+/** The shrink when putting back (0.7s of motion, about 0.3s real). */
+const SHRINK_RATE = 2.3;
 
 /** Jar box (640 px) to world: 100 px = 1 unit, the canvas bottom (box y 640) is world y −0.3. */
 const toWorld = (spot: Spot) => {
@@ -246,11 +279,12 @@ const toWorld = (spot: Spot) => {
   return { x: (spot.x - 320) / 100, y: 6.1 - spot.y / 100, scale: spot.width / 150, turn, tilt: REST_TILT + pose.tilt, yaw: pose.yaw, open: pose.open };
 };
 
-export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; onDone: () => void; onMidway?: () => void }) {
+export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: FoldMotion; onDone: () => void; onMidway?: () => void; onReady?: () => void }) {
   const holder = useRef<HTMLDivElement>(null);
   const done = useRef(onDone);
   const midway = useRef(onMidway);
-  useEffect(() => { done.current = onDone; midway.current = onMidway; }, [onDone, onMidway]);
+  const ready = useRef(onReady);
+  useEffect(() => { done.current = onDone; midway.current = onMidway; ready.current = onReady; }, [onDone, onMidway, onReady]);
 
   useEffect(() => {
     const el = holder.current;
@@ -278,7 +312,7 @@ export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; 
     camera.lookAt(0, 4.5, 0);
     const setLight = addLights(scene);
 
-    const note = makeNote(motion.name);
+    const note = makeNote(motion.name, motion.photoUrl ?? null);
     scene.add(note.turn);
 
     /* held in the middle, above the jar's opening, while it's written and folded; then let go,
@@ -379,7 +413,7 @@ export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; 
       }
       if (!overlay) toOverlay();
       fitOverlay();
-      setLight(0);
+      setLight(0, 1 - eio(seg(e, 0, SHRINK_SECONDS * 0.45)));
       const start = fromRect(motion.from!);
       const g = eio(seg(e, 0, SHRINK_SECONDS));
       note.shape(0);
@@ -392,7 +426,7 @@ export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; 
 
     let halfway = false;
     function applyLift(e: number) {
-      setLight(1 - eio(seg(e, 0, 0.8)));
+      setLight(1 - eio(seg(e, 0, 0.8)), eio(seg(e, 2.1, 2.65)));
       if (!halfway && e >= 0.8) { halfway = true; toOverlay(); midway.current?.(); }
       if (overlay) fitOverlay();
       const target = pickedTarget();
@@ -429,10 +463,10 @@ export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; 
        Each stage: [motion time it ends at, how many times faster than the study]. */
     const total = motion.mode === "drop" ? FOLD_SECONDS : motion.mode === "lift" ? LIFT_SECONDS : (motion.from ? SHRINK_SECONDS : 0) + FOLD_SECONDS;
     const stages: [number, number][] =
-      motion.mode === "drop" ? [[total, 1]]
+      motion.mode === "drop" ? [[total, ADD_SPEED]]
       : motion.mode === "lift" ? [[0.8, QUICK], [total, QUICK_OPEN]]
-      : motion.from ? [[SHRINK_SECONDS + 1.75, QUICK_OPEN], [total, QUICK]]
-      : [[total, QUICK]];
+      : motion.from ? [[SHRINK_SECONDS, SHRINK_RATE], [SHRINK_SECONDS + 1.75, PUT_BACK_FOLD], [total, PUT_BACK_DROP]]
+      : [[total, PUT_BACK_DROP]];
     const toMotion = (real: number) => {
       let at = 0, used = 0;
       for (const [end, rate] of stages) {
@@ -451,6 +485,7 @@ export function FoldingNote({ motion, onDone, onMidway }: { motion: FoldMotion; 
     };
     const length = stages.reduce((sum, [end, rate], i) => sum + (end - (i ? stages[i - 1][0] : 0)) / rate, 0);
     play(0);
+    ready.current?.();
 
     let frame = 0, start = 0, finished = false;
     const fonts = document.fonts?.ready ?? Promise.resolve();

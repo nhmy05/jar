@@ -72,7 +72,7 @@ export function DishForm({ onSave, initial }: { onSave: (dish: NewDish) => Promi
   }
 
   return <>
-    <h2 id="add-title" className="add-title">{editing ? "Edit this note." : "One more good idea."}</h2>
+    <h2 id="add-title" className="add-title">{editing ? "Edit this note" : "One more good idea."}</h2>
     <form className="dish-form" onSubmit={submit} noValidate aria-busy={saving}>
       <div className="field-group">
         <label htmlFor="dish-name">Dish name</label>

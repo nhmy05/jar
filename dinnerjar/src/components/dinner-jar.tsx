@@ -45,9 +45,12 @@ export function DinnerJar() {
   const [freshPull, setFreshPull] = useState(false);
   const afterMotion = useRef<(() => void) | null>(null);
   const midMotion = useRef<(() => void) | null>(null);
+  /** runs once the flying note has drawn its first frame, so nothing blinks out before it shows */
+  const readyMotion = useRef<(() => void) | null>(null);
   /** the popup is open but its note card waits for the flying note to land on it */
   const [arriving, setArriving] = useState(false);
   const [toast, setToast] = useState("");
+  const [toastTone, setToastTone] = useState<"ok" | "removed">("ok");
   const [announcement, setAnnouncement] = useState("");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const busy = useRef(false);
@@ -74,13 +77,15 @@ export function DinnerJar() {
   }
 
   /** Play the fold motion, then run `then` once (when it ends, or after a safety wait). */
-  function playMotion(mode: FoldMotion["mode"], name: string, spotIndex: number, then: () => void, halfway?: () => void, from?: FoldMotion["from"]) {
-    let ran = false, midRan = false;
+  function playMotion(mode: FoldMotion["mode"], name: string, spotIndex: number, then: () => void, halfway?: () => void, from?: FoldMotion["from"], photoUrl?: string | null, onReady?: () => void) {
+    let ran = false, midRan = false, readyRan = false;
+    const ready = () => { if (readyRan) return; readyRan = true; readyMotion.current = null; onReady?.(); };
     const mid = () => { if (midRan) return; midRan = true; midMotion.current = null; halfway?.(); };
-    const finish = () => { if (ran) return; ran = true; mid(); afterMotion.current = null; setMotion(null); then(); };
+    const finish = () => { if (ran) return; ran = true; ready(); mid(); afterMotion.current = null; setMotion(null); then(); };
     afterMotion.current = finish;
     midMotion.current = mid;
-    setMotion({ mode, name, spot: PILE[spotIndex], from });
+    readyMotion.current = ready;
+    setMotion({ mode, name, photoUrl, spot: PILE[spotIndex], from });
     later(finish, MOTION_SAFETY_MS);
   }
 
@@ -112,9 +117,10 @@ export function DinnerJar() {
         setDishes((previous) => [...previous, dish]);
         setPhase("idle");
         busy.current = false;
+        setToastTone("ok");
         setToast(`${dish.name} is in the jar.`);
         setAnnouncement(`${dish.name} has been added to your jar.`);
-      });
+      }, undefined, undefined, dish.photoUrl);
     } finally {
       setSavingDish(false);
       if (!saved) busy.current = false;
@@ -130,6 +136,7 @@ export function DinnerJar() {
     setDishes((previous) => previous.map((item) => (item.id === updated.id ? updated : item)));
     if (selected?.id === updated.id) setSelected(updated);
     setModal("collection");
+    setToastTone("ok");
     setToast(`${updated.name} is saved.`);
     setAnnouncement(`Your changes to ${updated.name} are saved.`);
   }
@@ -138,6 +145,7 @@ export function DinnerJar() {
     await apiRequest<{ ok: true }>(`/api/dishes/${dish.id}`, { method: "DELETE" });
     setDishes((previous) => previous.filter((item) => item.id !== dish.id));
     if (selected?.id === dish.id) setSelected(null);
+    setToastTone("removed");
     setToast(`${dish.name} is out of the jar.`);
     setAnnouncement(`${dish.name} was taken out of your jar.`);
   }
@@ -156,7 +164,6 @@ export function DinnerJar() {
         body: JSON.stringify({ exceptId: selected?.id || null }),
       });
       setSelected(dish);
-      setOutOfJar(true);
       playMotion("lift", dish.name, topSpot(dishes.length), () => {
         setArriving(false);
         setPhase("idle");
@@ -167,7 +174,7 @@ export function DinnerJar() {
         setFreshPull(true);
         setArriving(true);
         setModal("picked");
-      });
+      }, undefined, dish.photoUrl, () => setOutOfJar(true));
     } catch (error) {
       setPhase("idle");
       setOutOfJar(false);
@@ -181,9 +188,8 @@ export function DinnerJar() {
     /* the note starts from where its card is, then shrinks to above the jar */
     const card = document.querySelector(".picked-dialog .picked-slip")?.getBoundingClientRect();
     const from = card ? { left: card.left, top: card.top, width: card.width, height: card.height } : undefined;
-    setModal(null);
     /* opened from My dishes: it never left the jar */
-    if (!outOfJar) return;
+    if (!outOfJar) { setModal(null); return; }
     setPhase("returning");
     busy.current = true;
     setAnnouncement(`${selected.name} is folded back into the jar.`);
@@ -191,7 +197,7 @@ export function DinnerJar() {
       setOutOfJar(false);
       setPhase("idle");
       busy.current = false;
-    }, undefined, from);
+    }, undefined, from, selected.photoUrl, () => setModal(null));
   }
 
   const isBusy = loading || phase !== "idle" || savingDish;
@@ -220,12 +226,13 @@ export function DinnerJar() {
         <div className="scene-note note-left" aria-hidden="true"><span>every dish<br />you’ve loved</span><svg width="110" height="70" viewBox="0 0 110 70" fill="none"><path d="M8 6c-1 40 52 56 92 30m-9 .4 9-.4-4.1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
         <div className="scene-note note-right" aria-hidden="true"><svg width="62" height="54" viewBox="0 0 62 54" fill="none"><path d="M56 8C37-1 15 14 19 35m-4-5 4 7 6-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg><span>dishes<br />to try</span></div>
         <div className="jar-stage">
-          <JarView dishes={dishes} phase={phase} hideTop={outOfJar} motion={motion} onMotionDone={() => afterMotion.current?.()} onMotionMidway={() => midMotion.current?.()} />
+          <JarView dishes={dishes} phase={phase} hideTop={outOfJar} motion={motion} onMotionDone={() => afterMotion.current?.()} onMotionMidway={() => midMotion.current?.()} onMotionReady={() => readyMotion.current?.()} />
         </div>
         <div className="jar-count">{isEmpty ? "No dishes yet" : <><strong>{dishes.length}</strong> {dishes.length === 1 ? "dish" : "dishes"} to choose from</>}</div>
       </section>
 
       <div className="jar-actions">
+        <Doodles group="actions" />
         <div className="action-buttons">
           <button className="button button-secondary" onClick={() => setModal("add")} disabled={isBusy || isFull || !!connectionError}><Icon name="plus" size={19} />Add a dish</button>
           <button className="button button-primary pick-button" onClick={() => void pickDish()} disabled={isBusy || isEmpty || !!connectionError}><Icon name={phase === "pulling" ? "refresh" : "shuffle"} size={19} className={phase === "pulling" ? "spin" : ""} />{phase === "pulling" ? "Reaching in…" : "Pick a dish"}</button>
@@ -240,14 +247,16 @@ export function DinnerJar() {
     <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 
     {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
-    {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade hideClose><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
+    {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
     {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={removeDish} isFull={isFull} /></Dialog>}
     {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
         <div className="picked-content">
-          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="340px" /></div>}
-          <h2 id="picked-title">{selected.name}</h2>
-          {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer"><Icon name="link" size={16} />Open the recipe<Icon name="external" size={13} /></a> : null}
+          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="480px" /></div>}
+          <div className="picked-caption">
+            <h2 id="picked-title">{selected.name}</h2>
+            {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">Open the recipe<Icon name="external" size={13} /></a> : null}
+          </div>
         </div>
       </div>
       <div className="picked-actions">
@@ -258,13 +267,13 @@ export function DinnerJar() {
     {modal === "help" && <Dialog key="help" labelId="help-title" onClose={closeModal} className="help-dialog">
       <h2 id="help-title">How the jar works</h2>
       <ol className="help-steps">
-        <li><span className="step-number">1</span><div><h3>Write a note</h3><p>A dish you’ve cooked before. Add a photo from your gallery or a recipe link if you like.</p></div></li>
-        <li><span className="step-number">2</span><div><h3>Drop it in</h3><p>The note is folded twice so the name stays hidden inside.</p></div></li>
+        <li><span className="step-number">1</span><div><h3>Write a note</h3><p>A dish you’ve cooked before or would like to try. Add a photo or a recipe link if you like.</p></div></li>
+        <li><span className="step-number">2</span><div><h3>Drop it in</h3><p>Your note is folded and dropped into the jar, so every pull is a surprise.</p></div></li>
         <li><span className="step-number">3</span><div><h3>Pull one out</h3><p>Unfold it to see tonight’s idea. Put it back or pick another. Notes always go back in the jar.</p></div></li>
       </ol>
       <div className="help-tip"><Icon name="heart" size={17} /><p>You’re using the jar as a guest, so it’s saved in this browser. Signing in with Google to keep your jar everywhere is coming soon.</p></div>
       <button className="button button-primary help-done" onClick={closeModal}>Got it</button>
     </Dialog>}
-    {toast && <div className="toast" role="status"><span className="toast-check"><Icon name="check" size={15} /></span>{toast}<button className="icon-button" onClick={() => setToast("")} aria-label="Dismiss notification"><Icon name="close" size={15} /></button></div>}
+    {toast && <div className="toast" role="status"><span className={`toast-check${toastTone === "removed" ? " removed" : ""}`}><Icon name={toastTone === "removed" ? "trash" : "check"} size={toastTone === "removed" ? 14 : 15} /></span>{toast}<button className="icon-button" onClick={() => setToast("")} aria-label="Dismiss notification"><Icon name="close" size={15} /></button></div>}
   </div>;
 }

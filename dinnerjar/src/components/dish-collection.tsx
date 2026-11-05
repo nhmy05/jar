@@ -27,7 +27,6 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
   }
 
   return <>
-    <p className="dialog-eyebrow"><Icon name="book" size={15} />Your good-food collection</p>
     <h2 id="collection-title">My dishes</h2>
     <p className="dialog-description">{dishes.length} {dishes.length === 1 ? "dish" : "dishes"} in the jar</p>
     <div className="collection-toolbar">
@@ -43,8 +42,8 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
           <div><button className="text-button" onClick={() => setConfirmId(null)} disabled={removingId === dish.id}>Keep it</button><button className="button button-secondary button-small danger" onClick={() => void remove(dish)} disabled={removingId === dish.id}>{removingId === dish.id ? "Removing…" : "Take out"}</button></div>
         </div> : <>
           <button className="slip-open" onClick={() => onSelect(dish)} aria-label={`Edit ${dish.name}`}>
-            {dish.photoUrl && <span className="collection-photo"><Image src={dish.photoUrl} alt="" width={260} height={120} unoptimized /></span>}
             <span className="collection-slip-name">{dish.name}</span>
+            {dish.photoUrl && <span className="collection-photo"><Image src={dish.photoUrl} alt="" width={260} height={120} unoptimized /></span>}
             {dish.recipeUrl && <span className="collection-slip-meta"><Icon name="link" size={12} /> recipe link</span>}
           </button>
           <button className="icon-button slip-remove" onClick={() => setConfirmId(dish.id)} aria-label={`Take ${dish.name} out of the jar`}><Icon name="trash" size={15} /></button>

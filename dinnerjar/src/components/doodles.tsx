@@ -83,7 +83,7 @@ type Placement = { art: keyof typeof ART; left: string; top: string; size: numbe
  *   "hero": beside the headline (on a phone, beside "Ask the jar")
  *   "jar":  beside the jar, measured from its edges (--jar is the jar's size, set on .jar-scene)
  */
-const GROUPS: Record<"hero" | "jar", Placement[]> = {
+const GROUPS: Record<"hero" | "jar" | "actions", Placement[]> = {
   hero: [
     { art: "lemon", left: "max(30px, min(6%, calc(50% - 420px)))", top: "34px", size: 58, rotate: -12, className: "doodle-wide" },
     { art: "cherries", left: "min(calc(100% - 30px), max(94%, calc(50% + 420px)))", top: "150px", size: 54, rotate: 10, className: "doodle-wide" },
@@ -103,12 +103,24 @@ const GROUPS: Record<"hero" | "jar", Placement[]> = {
     { art: "mushroom", left: "calc(25% - var(--jar) / 4 + 95px)", top: "calc(100% - 18px - var(--jar) * .13)", size: 46, rotate: -8, className: "doodle-wide" },
     { art: "whisk", left: "min(calc(100% - 30px), calc(75% + var(--jar) / 4 + 150px))", top: "calc(100% - 18px - var(--jar) * .1)", size: 50, rotate: 24, className: "doodle-roomy" },
     /* small screens: beside the side notes in the top corners */
-    { art: "goldHeart", left: "22px", top: "108px", size: 20, rotate: -8, className: "doodle-small" },
-    { art: "goldSparkle", left: "calc(100% - 26px)", top: "142px", size: 24, rotate: 0, className: "doodle-small" },
+    { art: "goldHeart", left: "22px", top: "170px", size: 20, rotate: -8, className: "doodle-small" },
+    { art: "goldSparkle", left: "calc(100% - 26px)", top: "206px", size: 24, rotate: 0, className: "doodle-small" },
+    /* small screens: a few more by the bottom corners and shoulders, clear of the glass */
+    { art: "mushroom", left: "9%", top: "calc(100% - 18px - var(--jar) * .1)", size: 34, rotate: -8, className: "doodle-small" },
+    { art: "whisk", left: "92%", top: "calc(100% - 18px - var(--jar) * .16)", size: 38, rotate: 24, className: "doodle-small" },
+    { art: "egg", left: "93%", top: "calc(100% - 18px - var(--jar) * 1.04)", size: 28, rotate: 12, className: "doodle-small" },
+  ],
+  /* small screens only: along the bottom, between the buttons and the footer line */
+  actions: [
+    { art: "sprig", left: "9%", top: "calc(100% + 17px)", size: 26, rotate: -10, className: "doodle-small" },
+    { art: "goldSparkle", left: "28%", top: "calc(100% + 16px)", size: 20, rotate: 0, className: "doodle-small" },
+    { art: "goldHeart", left: "50%", top: "calc(100% + 17px)", size: 20, rotate: 0, className: "doodle-small" },
+    { art: "goldSparkle", left: "72%", top: "calc(100% + 16px)", size: 20, rotate: 0, className: "doodle-small" },
+    { art: "spoon", left: "91%", top: "calc(100% + 17px)", size: 26, rotate: 40, className: "doodle-small" },
   ],
 };
 
-export function Doodles({ group }: { group: "hero" | "jar" }) {
+export function Doodles({ group }: { group: "hero" | "jar" | "actions" }) {
   return <div className={`doodles doodles-${group}`} aria-hidden="true">
     {GROUPS[group].map((place, index) => <svg
       key={index}
