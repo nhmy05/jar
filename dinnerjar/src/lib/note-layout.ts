@@ -21,3 +21,9 @@ export function photoNameSize(name: string) {
   const length = name.trim().length;
   return length <= 14 ? 0.09 : length <= 30 ? 0.072 : 0.064;
 }
+
+/** Name size on a note without a photo: centred on the card, bigger. */
+export function plainNameSize(name: string) {
+  const length = name.trim().length;
+  return length <= 14 ? 0.11 : length <= 30 ? 0.09 : 0.075;
+}

@@ -23,14 +23,14 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
-import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, CARD_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
+import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, CARD_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize, plainNameSize } from "@/lib/note-layout";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
 export const LIFT_SECONDS = 2.65;
 
 const W = 3, H = 2.2, PI = Math.PI;
-/** TRIAL: notes with a photo are tall (an instant-photo card); plain notes stay wide. */
+/** Every note is a tall card; the old wide shape is kept for reference (pile pictures). */
 const noteHeight = (withPhoto: boolean) => (withPhoto ? W * PHOTO_NOTE_ASPECT : H);
 const tune = { flex: 0, roll: 1, bounce: 1, open: 1 };
 
@@ -93,9 +93,10 @@ function plainPaper(tall = false) {
   return canvas;
 }
 
-/* A note with a photo (tall card): square photo with an even white border at the top,
-   name (and link) centred below. Same numbers as the picked card (lib/note-layout). */
-function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLink: boolean) {
+/* Every note is the same tall card. With a photo: square photo with an even white border at
+   the top, name (and link) centred below. Without: name centred on the card.
+   Same numbers as the picked card (lib/note-layout). */
+function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false) {
   const canvas = document.createElement("canvas");
   canvas.width = 1200; canvas.height = Math.round(1200 * PHOTO_NOTE_ASPECT);
   const W = canvas.width;
@@ -103,6 +104,7 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
   paperEdge(g, W, canvas.height, CARD_RADIUS * W);
   const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
   const px = PHOTO_LEFT * W, py = PHOTO_TOP * W, side = PHOTO_SIZE * W;
+  if (withPhoto) {
   g.save();
   g.beginPath(); g.roundRect(px, py, side, side, PHOTO_RADIUS * W); g.clip();
   if (photo && photo.naturalWidth) {
@@ -112,8 +114,9 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
   }
   g.restore();
+  }
   const colW = TEXT_WIDTH * W;
-  const size = photoNameSize(name) * W;
+  const size = (withPhoto ? photoNameSize(name) : plainNameSize(name)) * W;
   g.font = `600 ${size}px ${family}`;
   /* wrap word by word with lines of even length, like the card does (text-wrap: balance) */
   const wrap = (width: number) => {
@@ -134,7 +137,8 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
   const lineH = size * 1.15;
   const linkSize = LINK_SIZE * W, linkGap = 0.012 * W, iconRoom = 0.014 * W;
   const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
-  const top = TEXT_TOP * W + (TEXT_HEIGHT * W - textH) / 2;
+  const areaTop = withPhoto ? TEXT_TOP * W : 0, areaH = withPhoto ? TEXT_HEIGHT * W : canvas.height;
+  const top = areaTop + (areaH - textH) / 2;
   const cx = W / 2;
   g.fillStyle = "#2f2b20";
   g.textAlign = "center";
@@ -148,65 +152,6 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     g.fillText(label, cx - iconRoom, y);
     const w = g.measureText(label).width + iconRoom * 2.5;
     g.fillRect(cx - iconRoom - w / 2 + iconRoom * 1.25, y + linkSize * 0.75, w, 0.003 * W);
-  }
-  return canvas;
-}
-
-function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false) {
-  if (withPhoto) return writeNameWithPhoto(name, photo, hasLink);
-  const canvas = document.createElement("canvas");
-  canvas.width = 1200; canvas.height = 880;
-  const g = canvas.getContext("2d")!;
-  paperEdge(g, canvas.width, canvas.height);
-  const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
-  /* same layout as the picked card (card is ~560px wide, this canvas 1200 wide: x2.14).
-     With a photo: photo fills the top 76%, name and link centred below. Without: name centred. */
-  const S = 1200 / 560;
-  const photoH = withPhoto ? Math.round(canvas.height * 0.76) : 0;
-  if (photo && photo.naturalWidth) {
-    /* cover fit, like the card */
-    const sc = Math.max(canvas.width / photo.naturalWidth, photoH / photo.naturalHeight);
-    const dw = photo.naturalWidth * sc, dh = photo.naturalHeight * sc;
-    g.save();
-    g.beginPath(); g.rect(0, 0, canvas.width, photoH); g.clip();
-    g.drawImage(photo, (canvas.width - dw) / 2, (photoH - dh) / 2, dw, dh);
-    g.restore();
-  } else if (withPhoto) {
-    g.fillStyle = "#f1ede0"; g.fillRect(0, 0, canvas.width, photoH);
-  }
-  g.fillStyle = "#2f2b20";  // same ink as the picked note
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  const maxW = (560 - 48) * S;
-  let size = Math.round((withPhoto ? 34 : 52) * S);
-  const minSize = withPhoto ? 40 : 56;
-  const words = name.split(" ");
-  let lines = [name];
-  g.font = `600 ${size}px ${family}`;
-  while (g.measureText(name).width > maxW && size > minSize) { size -= 4; g.font = `600 ${size}px ${family}`; }
-  if (g.measureText(name).width > maxW && words.length > 1) {
-    let best = 1, bestW = Infinity;
-    for (let i = 1; i < words.length; i++) {
-      const w = Math.max(g.measureText(words.slice(0, i).join(" ")).width, g.measureText(words.slice(i).join(" ")).width);
-      if (w < bestW) { bestW = w; best = i; }
-    }
-    lines = [words.slice(0, best).join(" "), words.slice(best).join(" ")];
-    while (bestW > maxW && size > minSize) { size -= 4; g.font = `600 ${size}px ${family}`; bestW = Math.max(...lines.map((l) => g.measureText(l).width)); }
-  }
-  const lineH = size * 1.15;
-  const linkSize = 13.5 * S, linkGap = (withPhoto ? 4 : 4) * S + 4 * S;
-  const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
-  const areaTop = photoH, areaH = canvas.height - photoH;
-  const top = areaTop + (areaH - textH) / 2;
-  lines.forEach((line, i) => g.fillText(line, canvas.width / 2, top + lineH * (i + 0.5), 1100));
-  if (hasLink) {
-    g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
-    g.fillStyle = "#44563a";
-    const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
-    const label = "Open the recipe";
-    g.fillText(label, canvas.width / 2 - 8 * S, y);
-    const w = g.measureText(label).width + 20 * S;
-    g.fillRect(canvas.width / 2 - 8 * S - w / 2 + 10 * S, y + linkSize * 0.75, w, 1.5 * S);
   }
   return canvas;
 }
@@ -253,9 +198,9 @@ function addLights(scene: THREE.Scene) {
   return set;
 }
 
-function makeNote(name: string, photoUrl: string | null = null, hasLink = false, tall = !!photoUrl) {
+function makeNote(name: string, photoUrl: string | null = null, hasLink = false, tall = true) {
   let photo: HTMLImageElement | null = null;
-  const nameCanvas = writeName(name, null, hasLink, tall);
+  const nameCanvas = writeName(name, null, hasLink, !!photoUrl);
   const frontTex = new THREE.CanvasTexture(nameCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
   frontTex.anisotropy = 8;
@@ -295,7 +240,7 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false,
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, tall), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, true), 0, 0);
     frontTex.needsUpdate = true;
   }
 
@@ -488,7 +433,7 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
       const f = jarFrame();
       const card = document.querySelector(".picked-dialog .picked-slip")?.getBoundingClientRect();
       if (card && card.width > 0) return fromRect(card);
-      const tall = !!motion.photoUrl;
+      const tall = true;
       const width = tall ? Math.min(440, (window.innerHeight - 200) / PHOTO_NOTE_ASPECT, window.innerWidth - 12 * 2) : Math.min(560, (window.innerHeight - 200) / (H / W), window.innerWidth - 12 * 2);
       const k = width / (W * f.ppu);
       return { x: 0, y: -0.3 + (f.bottom - window.innerHeight / 2) / f.ppu, k };

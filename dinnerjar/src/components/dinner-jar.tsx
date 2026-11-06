@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { topSpot, type JarPhase } from "@/components/jar-illustration";
 import { FOLD_SECONDS, type FoldMotion } from "@/components/folding-note";
 import { PILE } from "@/lib/pile";
-import { photoNameSize } from "@/lib/note-layout";
+import { photoNameSize, plainNameSize } from "@/lib/note-layout";
 import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
 import { DishForm, type NewDish } from "@/components/dish-form";
@@ -253,11 +253,11 @@ export function DinnerJar() {
     {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
     {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
     {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={isOwner ? removeDish : undefined} isFull={isFull} /></Dialog>}
-    {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${selected.photoUrl ? " tall" : ""}${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
+    {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog tall${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
         <div className={`picked-content${selected.photoUrl ? " has-photo" : ""}`}>
           {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="340px" /></div>}
-          <div className="picked-caption" style={selected.photoUrl ? { "--name-size": `${(photoNameSize(selected.name) * 100).toFixed(2)}cqw` } as CSSProperties : undefined}>
+          <div className="picked-caption" style={{ "--name-size": `${((selected.photoUrl ? photoNameSize : plainNameSize)(selected.name) * 100).toFixed(2)}cqw` } as CSSProperties}>
             <h2 id="picked-title">{selected.name}</h2>
             {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">Open the recipe<Icon name="external" size={13} /></a> : null}
           </div>

@@ -210,6 +210,9 @@ svg { flex-shrink: 0; }
 .has-photo .picked-caption { width: 88cqw; flex: 1; padding: 0; }
 .has-photo .picked-caption .recipe-link { font-size: 3.4cqw; margin-top: 1.2cqw; gap: 1cqw; }
 .picked-content.has-photo .picked-caption h2 { font-size: var(--name-size); text-wrap: balance; }
+.tall .picked-content:not(.has-photo) .picked-caption { padding: 0 6cqw; }
+.tall .picked-content:not(.has-photo) .picked-caption h2 { font-size: var(--name-size); text-wrap: balance; }
+.tall .picked-content:not(.has-photo) .recipe-link { font-size: 3.4cqw; margin-top: 1.2cqw; gap: 1cqw; }
 .picked-caption .recipe-link { margin-top: 4px; padding: 2px 0; white-space: nowrap; }
 .recipe-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 4px 0; border-bottom: 1.5px solid #44563a; font-size: 13.5px; font-weight: 600; color: #44563a; transition: color .2s; }
 .recipe-link:hover { color: var(--green-dark); }
