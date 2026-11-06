@@ -259,7 +259,7 @@ export function DinnerJar() {
           {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="340px" /></div>}
           <div className="picked-caption" style={selected.photoUrl ? { "--name-size": `${(photoNameSize(selected.name) * 100).toFixed(2)}cqw` } as CSSProperties : undefined}>
             <h2 id="picked-title">{selected.name}</h2>
-            {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">{selected.photoUrl ? "Recipe" : "Open the recipe"}<Icon name="external" size={13} /></a> : null}
+            {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">Open the recipe<Icon name="external" size={13} /></a> : null}
           </div>
         </div>
       </div>

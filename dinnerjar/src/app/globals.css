@@ -201,10 +201,10 @@ svg { flex-shrink: 0; }
 .picked-caption { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 24px; text-align: center; }
 .picked-caption h2 { margin: 0; font-size: 52px; }
 .picked-photo + .picked-caption h2 { font-size: 34px; }
-/* photo note: square photo left, name right. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
-.picked-content.has-photo { flex-direction: row; align-items: center; padding: 0 3.6cqw; gap: 3cqw; }
-.has-photo .picked-photo { width: 60cqw; height: 60cqw; }
-.has-photo .picked-caption { width: 30.4cqw; flex: none; padding: 0; }
+/* photo note: square photo centred at the top, name below. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
+.picked-content.has-photo { flex-direction: column; align-items: center; justify-content: flex-start; padding: 5cqw 0 0; }
+.has-photo .picked-photo { width: 46cqw; height: 46cqw; }
+.has-photo .picked-caption { width: 88cqw; flex: 1; padding: 0; }
 .picked-content.has-photo .picked-caption h2 { font-size: var(--name-size); }
 .picked-caption .recipe-link { margin-top: 4px; padding: 2px 0; white-space: nowrap; }
 .recipe-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 4px 0; border-bottom: 1.5px solid #44563a; font-size: 13.5px; font-weight: 600; color: #44563a; transition: color .2s; }
