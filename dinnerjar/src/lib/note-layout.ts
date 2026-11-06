@@ -4,7 +4,7 @@
    the folding note (canvas, 3D paper) draw exactly the same thing at any size. */
 export const NOTE_ASPECT = 2.2 / 3;          // plain note, no photo: wide
 export const PHOTO_NOTE_ASPECT = 1.22;       // note with a photo: tall
-export const PHOTO_MARGIN = 0.04;            // white border left, top and right of the photo
+export const PHOTO_MARGIN = 0.025;           // white border left, top and right of the photo
 export const PHOTO_SIZE = 1 - 2 * PHOTO_MARGIN;
 export const PHOTO_LEFT = PHOTO_MARGIN;
 export const PHOTO_TOP = PHOTO_MARGIN;
