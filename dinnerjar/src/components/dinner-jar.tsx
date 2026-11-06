@@ -220,6 +220,7 @@ export function DinnerJar() {
         <Doodles group="hero" />
         <h1 id="hero-title">Can’t decide? <em>Ask the jar</em></h1>
         <p>Write down dishes you’ve cooked and loved, fold them in,<br className="desktop-break" /> and pull one out whenever you need an idea.</p>
+        <button className="help-link help-link-phone" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
       </section>
 
       <section className="jar-scene" aria-label="Your dinner jar">

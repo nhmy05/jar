@@ -50,6 +50,7 @@ svg { flex-shrink: 0; }
 .header-nav { display: flex; align-items: center; gap: 18px; }
 .help-link { background: none; color: var(--ink-soft); font-size: 13px; padding: 8px 0; text-decoration: underline; text-decoration-color: #d9c890; text-underline-offset: 4px; transition: color .2s; }
 .help-link:hover { color: var(--ink); }
+.help-link-phone { display: none; }
 .nav-divider { height: 18px; width: 1px; background: var(--line); }
 .collection-button { display: flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px 8px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 2px 0 #f1e2ad; transition: transform .2s, box-shadow .2s; }
 .collection-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 0 #ecd99a; }
@@ -250,7 +251,8 @@ svg { flex-shrink: 0; }
   .site-header { width: calc(100% - 32px); height: 68px; }
   .brand { font-size: 23px; gap: 6px; }
   .brand-mark { width: 30px; height: 30px; }
-  .help-link, .nav-divider { display: none; }
+  .help-link:not(.help-link-phone), .nav-divider { display: none; }
+  .help-link-phone { display: inline-block; margin-top: 6px; }
   .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; }
   .main-scene { width: calc(100% - 32px); }
   .hero { padding-top: 22px; }
