@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   title: "The Dinner Jar",
   description: "A glass jar of dishes you’ve cooked and loved. Write one on a note, drop it in, and pull one out when you can’t decide what to make.",
   applicationName: "The Dinner Jar",
-  icons: { icon: "/icon.svg" },
+  icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  appleWebApp: { capable: true, title: "Dinner Jar", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = { themeColor: "#FDFAE9" };

@@ -310,13 +310,18 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
     if (!el || reduce) { const id = setTimeout(() => done.current(), 0); return () => clearTimeout(id); }
 
     let renderer: THREE.WebGLRenderer;
+    let lowQuality = false;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      /* weak phones (few cores or little memory) get the lighter setting: no edge smoothing, normal pixel density */
+      const nav = navigator as Navigator & { deviceMemory?: number };
+      const weak = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+      lowQuality = weak;
+      renderer = new THREE.WebGLRenderer({ antialias: !weak, alpha: true });
     } catch {
       const id = setTimeout(() => done.current(), 0);
       return () => clearTimeout(id);
     }
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setPixelRatio(lowQuality ? 1 : Math.min(2, window.devicePixelRatio || 1));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x000000, 0);
     el.appendChild(renderer.domElement);
