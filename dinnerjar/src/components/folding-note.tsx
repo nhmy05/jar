@@ -23,7 +23,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
-import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
+import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, CARD_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
@@ -78,27 +78,29 @@ function paper(t: number, open = 1): Pose {
 /* ---------- the name, written on the paper ---------- */
 
 /** Plain white paper, the same white as the notes in the jar. Light and shade give it its shape. */
-function paperEdge(g: CanvasRenderingContext2D, w: number, h: number) {
+/* White paper. The photo card has soft corners: outside them the canvas stays see-through. */
+function paperEdge(g: CanvasRenderingContext2D, w: number, h: number, radius = 0) {
   g.fillStyle = "#FFFFFF";
-  g.fillRect(0, 0, w, h);
+  if (!radius) { g.fillRect(0, 0, w, h); return; }
+  g.clearRect(0, 0, w, h);
+  g.beginPath(); g.roundRect(0, 0, w, h, radius); g.fill();
 }
 
-function plainPaper() {
+function plainPaper(tall = false) {
   const canvas = document.createElement("canvas");
-  canvas.width = 600; canvas.height = 440;
-  const g = canvas.getContext("2d")!;
-  g.save(); g.scale(0.5, 0.5); paperEdge(g, 1200, 880); g.restore();
+  canvas.width = 600; canvas.height = tall ? Math.round(600 * PHOTO_NOTE_ASPECT) : 440;
+  paperEdge(canvas.getContext("2d")!, canvas.width, canvas.height, tall ? CARD_RADIUS * 600 : 0);
   return canvas;
 }
 
-/* A note with a photo (TRIAL: tall card): square photo with an even white border at the top,
+/* A note with a photo (tall card): square photo with an even white border at the top,
    name (and link) centred below. Same numbers as the picked card (lib/note-layout). */
 function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLink: boolean) {
   const canvas = document.createElement("canvas");
   canvas.width = 1200; canvas.height = Math.round(1200 * PHOTO_NOTE_ASPECT);
   const W = canvas.width;
   const g = canvas.getContext("2d")!;
-  paperEdge(g, W, canvas.height);
+  paperEdge(g, W, canvas.height, CARD_RADIUS * W);
   const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
   const px = PHOTO_LEFT * W, py = PHOTO_TOP * W, side = PHOTO_SIZE * W;
   g.save();
@@ -262,11 +264,11 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false,
   const NH = noteHeight(tall);
   const geo = new THREE.PlaneGeometry(W, NH, 64, Math.round(48 * NH / H));
   const base = (geo.attributes.position.array as Float32Array).slice();
-  const frontMat = new THREE.MeshLambertMaterial({ map: frontTex, side: THREE.BackSide, emissive: 0x383328 });
-  const backTex = new THREE.CanvasTexture(plainPaper());
+  const frontMat = new THREE.MeshLambertMaterial({ map: frontTex, side: THREE.BackSide, emissive: 0x383328, alphaTest: 0.5 });
+  const backTex = new THREE.CanvasTexture(plainPaper(tall));
   backTex.colorSpace = THREE.SRGBColorSpace;
   backTex.anisotropy = 8;
-  const backMat = new THREE.MeshLambertMaterial({ map: backTex, side: THREE.FrontSide, emissive: 0x383328 });
+  const backMat = new THREE.MeshLambertMaterial({ map: backTex, side: THREE.FrontSide, emissive: 0x383328, alphaTest: 0.5 });
   const shift = new THREE.Group(); shift.add(new THREE.Mesh(geo, frontMat), new THREE.Mesh(geo, backMat));
   const spin = new THREE.Group(); spin.rotation.z = PI; spin.add(shift);
   /* outer: tilt and size. turn: where it is, and its left/right turn on screen */

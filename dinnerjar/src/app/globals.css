@@ -204,7 +204,7 @@ svg { flex-shrink: 0; }
 /* photo note: square photo centred at the top, name below. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
 /* TRIAL: a note with a photo is a tall card, square photo with an even white border, name below */
 .picked-dialog.tall { width: min(468px, calc((100dvh - 200px) / 1.22 + 28px)); }
-.tall .picked-slip { aspect-ratio: 1 / 1.22; }
+.tall .picked-slip { aspect-ratio: 1 / 1.22; border-radius: 3.5% / 2.87%; } /* = CARD_RADIUS of width, both ways */
 .picked-content.has-photo { flex-direction: column; align-items: center; justify-content: flex-start; padding: 4cqw 0 0; }
 .has-photo .picked-photo { width: 92cqw; height: 92cqw; border-radius: 2.2cqw; }
 .has-photo .picked-caption { width: 88cqw; flex: 1; padding: 0; }
