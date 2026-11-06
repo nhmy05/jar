@@ -273,7 +273,7 @@ export function DinnerJar() {
         <li><span className="step-number">2</span><div><h3>Drop it in</h3><p>Your note is folded and dropped into the jar, so every pull is a surprise.</p></div></li>
         <li><span className="step-number">3</span><div><h3>Pull one out</h3><p>Unfold it to see tonight’s idea. Put it back or pick another. Notes always go back in the jar.</p></div></li>
       </ol>
-      <div className="help-tip"><Icon name="heart" size={17} /><p>You’re using the jar as a guest, so it’s saved in this browser. Signing in with Google to keep your jar everywhere is coming soon.</p></div>
+      <div className="help-tip"><Icon name="heart" size={17} /><p>This is one shared jar, saved online. Anyone with the link can add dishes, and every dish stays until the jar’s owner takes it out.</p></div>
       <button className="button button-primary help-done" onClick={closeModal}>Got it</button>
     </Dialog>}
     {toast && <div className="toast" role="status"><span className={`toast-check${toastTone === "removed" ? " removed" : ""}`}><Icon name={toastTone === "removed" ? "trash" : "check"} size={toastTone === "removed" ? 14 : 15} /></span>{toast}<button className="icon-button" onClick={() => setToast("")} aria-label="Dismiss notification"><Icon name="close" size={15} /></button></div>}
