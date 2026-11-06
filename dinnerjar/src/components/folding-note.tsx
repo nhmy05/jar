@@ -23,7 +23,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
-import { PHOTO_LEFT, PHOTO_SIZE, PHOTO_TOP, TEXT_LEFT, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
+import { PHOTO_LEFT, PHOTO_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_LEFT, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
@@ -99,22 +99,34 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
   paperEdge(g, W, canvas.height);
   const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
   const px = PHOTO_LEFT * W, py = PHOTO_TOP * W, side = PHOTO_SIZE * W;
+  g.save();
+  g.beginPath(); g.roundRect(px, py, side, side, PHOTO_RADIUS * W); g.clip();
   if (photo && photo.naturalWidth) {
     const crop = Math.min(photo.naturalWidth, photo.naturalHeight);
     g.drawImage(photo, (photo.naturalWidth - crop) / 2, (photo.naturalHeight - crop) / 2, crop, crop, px, py, side, side);
   } else {
     g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
   }
+  g.restore();
   const S = W / 560;
   const colX = TEXT_LEFT * W, colW = TEXT_WIDTH * W;
   const size = photoNameSize(name) * W;
   g.font = `600 ${size}px ${family}`;
-  /* wrap word by word, like the card does */
-  const lines: string[] = [];
-  for (const word of name.trim().split(/\s+/)) {
-    const last = lines[lines.length - 1];
-    if (last && g.measureText(`${last} ${word}`).width <= colW) lines[lines.length - 1] = `${last} ${word}`;
-    else lines.push(word);
+  /* wrap word by word with lines of even length, like the card does (text-wrap: balance) */
+  const wrap = (width: number) => {
+    const out: string[] = [];
+    for (const word of name.trim().split(/\s+/)) {
+      const last = out[out.length - 1];
+      if (last && g.measureText(`${last} ${word}`).width <= width) out[out.length - 1] = `${last} ${word}`;
+      else out.push(word);
+    }
+    return out;
+  };
+  let lines = wrap(colW);
+  for (let width = colW * 0.97; width > colW * 0.4; width *= 0.97) {
+    const tighter = wrap(width);
+    if (tighter.length > lines.length) break;
+    lines = tighter;
   }
   const lineH = size * 1.15;
   const linkSize = 13.5 * S, linkGap = 8 * S;
