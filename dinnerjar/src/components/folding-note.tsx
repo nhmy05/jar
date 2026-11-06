@@ -23,13 +23,15 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
-import { PHOTO_LEFT, PHOTO_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_LEFT, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
+import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
 export const LIFT_SECONDS = 2.65;
 
 const W = 3, H = 2.2, PI = Math.PI;
+/** TRIAL: notes with a photo are tall (an instant-photo card); plain notes stay wide. */
+const noteHeight = (withPhoto: boolean) => (withPhoto ? W * PHOTO_NOTE_ASPECT : H);
 const tune = { flex: 0, roll: 1, bounce: 1, open: 1 };
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -89,11 +91,11 @@ function plainPaper() {
   return canvas;
 }
 
-/* A note with a photo: square photo on the left, name (and link) centred in the column on the
-   right. Same numbers as the picked card (lib/note-layout). */
+/* A note with a photo (TRIAL: tall card): square photo with an even white border at the top,
+   name (and link) centred below. Same numbers as the picked card (lib/note-layout). */
 function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLink: boolean) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1200; canvas.height = 880;
+  canvas.width = 1200; canvas.height = Math.round(1200 * PHOTO_NOTE_ASPECT);
   const W = canvas.width;
   const g = canvas.getContext("2d")!;
   paperEdge(g, W, canvas.height);
@@ -108,8 +110,7 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
   }
   g.restore();
-  const S = W / 560;
-  const colX = TEXT_LEFT * W, colW = TEXT_WIDTH * W;
+  const colW = TEXT_WIDTH * W;
   const size = photoNameSize(name) * W;
   g.font = `600 ${size}px ${family}`;
   /* wrap word by word with lines of even length, like the card does (text-wrap: balance) */
@@ -129,10 +130,10 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     lines = tighter;
   }
   const lineH = size * 1.15;
-  const linkSize = 13.5 * S, linkGap = 8 * S;
+  const linkSize = LINK_SIZE * W, linkGap = 0.012 * W, iconRoom = 0.014 * W;
   const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
-  const top = (canvas.height - textH) / 2;
-  const cx = colX + colW / 2;
+  const top = TEXT_TOP * W + (TEXT_HEIGHT * W - textH) / 2;
+  const cx = W / 2;
   g.fillStyle = "#2f2b20";
   g.textAlign = "center";
   g.textBaseline = "middle";
@@ -141,10 +142,10 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
     g.fillStyle = "#44563a";
     const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
-    const label = "Recipe";
-    g.fillText(label, cx - 8 * S, y);
-    const w = g.measureText(label).width + 20 * S;
-    g.fillRect(cx - 8 * S - w / 2 + 10 * S, y + linkSize * 0.75, w, 1.5 * S);
+    const label = "Open the recipe";
+    g.fillText(label, cx - iconRoom, y);
+    const w = g.measureText(label).width + iconRoom * 2.5;
+    g.fillRect(cx - iconRoom - w / 2 + iconRoom * 1.25, y + linkSize * 0.75, w, 0.003 * W);
   }
   return canvas;
 }
@@ -250,15 +251,16 @@ function addLights(scene: THREE.Scene) {
   return set;
 }
 
-function makeNote(name: string, photoUrl: string | null = null, hasLink = false) {
+function makeNote(name: string, photoUrl: string | null = null, hasLink = false, tall = !!photoUrl) {
   let photo: HTMLImageElement | null = null;
-  const nameCanvas = writeName(name, null, hasLink, !!photoUrl);
+  const nameCanvas = writeName(name, null, hasLink, tall);
   const frontTex = new THREE.CanvasTexture(nameCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
   frontTex.anisotropy = 8;
   /* the viewer side is the geometry's back face; mirror so the name reads right */
   frontTex.wrapS = THREE.RepeatWrapping; frontTex.repeat.x = -1; frontTex.offset.x = 1;
-  const geo = new THREE.PlaneGeometry(W, H, 64, 48);
+  const NH = noteHeight(tall);
+  const geo = new THREE.PlaneGeometry(W, NH, 64, Math.round(48 * NH / H));
   const base = (geo.attributes.position.array as Float32Array).slice();
   const frontMat = new THREE.MeshLambertMaterial({ map: frontTex, side: THREE.BackSide, emissive: 0x383328 });
   const backTex = new THREE.CanvasTexture(plainPaper());
@@ -286,12 +288,12 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false)
     geo.attributes.position.needsUpdate = true;
     geo.computeVertexNormals();
     geo.computeBoundingSphere();
-    shift.position.set((-W / 4) * P.s1, (H / 4) * P.s2, 0);
+    shift.position.set((-W / 4) * P.s1, (NH / 4) * P.s2, 0);
     return P;
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, !!photoUrl), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, tall), 0, 0);
     frontTex.needsUpdate = true;
   }
 
@@ -310,7 +312,7 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false)
  * Picture of a landed note in one of NOTE_POSES (the last frame of the motion), for the pile.
  * 2.4 × 2.4 world units around the note's center. Used to make public/notes/note-N.png.
  */
-export function renderLandedNote(poseIndex: number, px = 480) {
+export function renderLandedNote(poseIndex: number, px = 480, tall = false) {
   const pose = NOTE_POSES[poseIndex];
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -320,7 +322,7 @@ export function renderLandedNote(poseIndex: number, px = 480) {
   addLights(scene);
   const camera = new THREE.OrthographicCamera(-1.2, 1.2, 1.2, -1.2, 0.1, 40);
   camera.position.set(0, 0, 20);
-  const note = makeNote("");
+  const note = makeNote("", null, false, tall);
   note.shape(FOLD_SECONDS, pose.open);
   note.outer.rotation.set(REST_TILT + pose.tilt, pose.yaw, 0);
   note.turn.rotation.set(0, 0, pose.roll);
@@ -484,7 +486,8 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
       const f = jarFrame();
       const card = document.querySelector(".picked-dialog .picked-slip")?.getBoundingClientRect();
       if (card && card.width > 0) return fromRect(card);
-      const width = Math.min(560, (window.innerHeight - 200) / (H / W), window.innerWidth - 12 * 2);
+      const tall = !!motion.photoUrl;
+      const width = tall ? Math.min(440, (window.innerHeight - 200) / PHOTO_NOTE_ASPECT, window.innerWidth - 12 * 2) : Math.min(560, (window.innerHeight - 200) / (H / W), window.innerWidth - 12 * 2);
       const k = width / (W * f.ppu);
       return { x: 0, y: -0.3 + (f.bottom - window.innerHeight / 2) / f.ppu, k };
     }

@@ -46,7 +46,7 @@ export function JarIllustration({ dishes, phase, hideTop = false }: { dishes: Di
         {spots.map((spot, index) => {
           /* the same picture the fold motion ends on: 240 px = the 2.4 units it was drawn at, size 1 = 150 px wide */
           const k = spot.width / 150;
-          return <image key={dishes[index].id} href={`/notes/note-${spot.pose}.png`} x="-120" y="-120" width="240" height="240" transform={`translate(${spot.x.toFixed(1)} ${spot.y.toFixed(1)}) scale(${k.toFixed(3)})`} filter="url(#j-note-shadow)" />;
+          return <image key={dishes[index].id} href={`/notes/note-${spot.pose}${dishes[index].photoUrl ? "-tall" : ""}.png`} x="-120" y="-120" width="240" height="240" transform={`translate(${spot.x.toFixed(1)} ${spot.y.toFixed(1)}) scale(${k.toFixed(3)})`} filter="url(#j-note-shadow)" />;
         })}
       </g>
     </g>

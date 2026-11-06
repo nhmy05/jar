@@ -201,10 +201,14 @@ svg { flex-shrink: 0; }
 .picked-caption { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 24px; text-align: center; }
 .picked-caption h2 { margin: 0; font-size: 52px; }
 .picked-photo + .picked-caption h2 { font-size: 34px; }
-/* photo note: square photo left, name right. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
-.picked-content.has-photo { flex-direction: row; align-items: center; padding: 0 3.6cqw 0 4cqw; gap: 3cqw; }
-.has-photo .picked-photo { width: 65.33cqw; height: 65.33cqw; border-radius: 2.2cqw; }
-.has-photo .picked-caption { width: 24.07cqw; flex: none; padding: 0; }
+/* photo note: square photo centred at the top, name below. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
+/* TRIAL: a note with a photo is a tall card, square photo with an even white border, name below */
+.picked-dialog.tall { width: min(468px, calc((100dvh - 200px) / 1.22 + 28px)); }
+.tall .picked-slip { aspect-ratio: 1 / 1.22; }
+.picked-content.has-photo { flex-direction: column; align-items: center; justify-content: flex-start; padding: 4cqw 0 0; }
+.has-photo .picked-photo { width: 92cqw; height: 92cqw; border-radius: 2.2cqw; }
+.has-photo .picked-caption { width: 88cqw; flex: 1; padding: 0; }
+.has-photo .picked-caption .recipe-link { font-size: 3.4cqw; margin-top: 1.2cqw; gap: 1cqw; }
 .picked-content.has-photo .picked-caption h2 { font-size: var(--name-size); text-wrap: balance; }
 .picked-caption .recipe-link { margin-top: 4px; padding: 2px 0; white-space: nowrap; }
 .recipe-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 4px 0; border-bottom: 1.5px solid #44563a; font-size: 13.5px; font-weight: 600; color: #44563a; transition: color .2s; }
