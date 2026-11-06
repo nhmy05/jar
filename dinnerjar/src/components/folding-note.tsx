@@ -240,7 +240,7 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false,
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, true), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, !!photoUrl), 0, 0);
     frontTex.needsUpdate = true;
   }
 
