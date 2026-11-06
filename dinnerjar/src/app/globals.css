@@ -50,7 +50,7 @@ svg { flex-shrink: 0; }
 .header-nav { display: flex; align-items: center; gap: 18px; }
 .help-link { background: none; color: var(--ink-soft); font-size: 13px; padding: 8px 0; text-decoration: underline; text-decoration-color: #d9c890; text-underline-offset: 4px; transition: color .2s; }
 .help-link:hover { color: var(--ink); }
-.help-round { display: none; width: 30px; height: 30px; padding: 0; border-radius: 50%; background: #fffcf0; border: 1px solid var(--line); box-shadow: 0 2px 0 #eadfae; color: var(--ink-soft); font-family: var(--font-serif), Georgia, serif; font-size: 17px; line-height: 1; justify-content: center; align-items: center; }
+.help-round { display: none; position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 3; width: 30px; height: 30px; padding: 0; border-radius: 50%; background: #fffcf0; border: 1px solid var(--line); box-shadow: 0 2px 0 #eadfae; color: var(--ink-soft); font-family: var(--font-serif), Georgia, serif; font-size: 17px; line-height: 1; justify-content: center; align-items: center; }
 .nav-divider { height: 18px; width: 1px; background: var(--line); }
 .collection-button { display: flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px 8px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 2px 0 #f1e2ad; transition: transform .2s, box-shadow .2s; }
 .collection-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 0 #ecd99a; }
@@ -254,13 +254,11 @@ svg { flex-shrink: 0; }
 }
 @media (max-width: 640px) {
   .site-header { width: calc(100% - 32px); height: 68px; }
-  .brand { font-size: 20px; gap: 6px; white-space: nowrap; }
+  .brand { font-size: 23px; gap: 6px; }
   .brand-mark { width: 30px; height: 30px; }
   .help-link, .nav-divider { display: none; }
   .help-round { display: inline-flex; }
-  .header-nav { gap: 10px; }
-  .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; white-space: nowrap; }
-  .collection-button svg { display: none; }
+  .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; }
   .main-scene { width: calc(100% - 32px); }
   .hero { padding-top: 22px; }
   .hero h1 { font-size: 38px; letter-spacing: -1px; }

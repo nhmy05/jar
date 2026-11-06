@@ -211,7 +211,6 @@ export function DinnerJar() {
       <Link className="brand" href="/" aria-label="The dinner jar home"><JarLogo /><span>the dinner jar<span className="brand-period">.</span></span></Link>
       <nav className="header-nav" aria-label="Main navigation">
         <button className="help-link" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
-        <button className="help-round" onClick={() => setModal("help")} disabled={isBusy} aria-label="How it works" title="How it works">?</button>
         <span className="nav-divider" />
         <button className="collection-button" onClick={() => setModal("collection")} disabled={isBusy}><Icon name="book" size={17} /><span>My dishes</span><span className="collection-count">{dishes.length}</span></button>
       </nav>
@@ -246,7 +245,9 @@ export function DinnerJar() {
       {actionError && <div className="connection-error" role="alert"><p>{actionError}</p><button className="icon-button" aria-label="Dismiss error" onClick={() => setActionError("")}><Icon name="close" size={16} /></button></div>}
     </main>
 
-    <footer className="site-footer"><span>Made to answer the question: What’s for dinner?</span></footer>
+    <footer className="site-footer"><span>Made to answer the question: What’s for dinner?</span>
+      <button className="help-round" onClick={() => setModal("help")} disabled={isBusy} aria-label="How it works" title="How it works">?</button>
+    </footer>
     <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 
     {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
