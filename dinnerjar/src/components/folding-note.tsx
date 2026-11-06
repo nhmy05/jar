@@ -129,7 +129,7 @@ function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLin
     g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
     g.fillStyle = "#44563a";
     const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
-    const label = "Open the recipe";
+    const label = "Recipe";
     g.fillText(label, cx - 8 * S, y);
     const w = g.measureText(label).width + 20 * S;
     g.fillRect(cx - 8 * S - w / 2 + 10 * S, y + linkSize * 0.75, w, 1.5 * S);
