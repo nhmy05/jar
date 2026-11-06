@@ -23,6 +23,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
+import { PHOTO_LEFT, PHOTO_SIZE, PHOTO_TOP, TEXT_LEFT, TEXT_WIDTH, photoNameSize } from "@/lib/note-layout";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
@@ -88,7 +89,56 @@ function plainPaper() {
   return canvas;
 }
 
+/* A note with a photo: square photo on the left, name (and link) centred in the column on the
+   right. Same numbers as the picked card (lib/note-layout). */
+function writeNameWithPhoto(name: string, photo: HTMLImageElement | null, hasLink: boolean) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200; canvas.height = 880;
+  const W = canvas.width;
+  const g = canvas.getContext("2d")!;
+  paperEdge(g, W, canvas.height);
+  const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
+  const px = PHOTO_LEFT * W, py = PHOTO_TOP * W, side = PHOTO_SIZE * W;
+  if (photo && photo.naturalWidth) {
+    const crop = Math.min(photo.naturalWidth, photo.naturalHeight);
+    g.drawImage(photo, (photo.naturalWidth - crop) / 2, (photo.naturalHeight - crop) / 2, crop, crop, px, py, side, side);
+  } else {
+    g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
+  }
+  const S = W / 560;
+  const colX = TEXT_LEFT * W, colW = TEXT_WIDTH * W;
+  const size = photoNameSize(name) * W;
+  g.font = `600 ${size}px ${family}`;
+  /* wrap word by word, like the card does */
+  const lines: string[] = [];
+  for (const word of name.trim().split(/\s+/)) {
+    const last = lines[lines.length - 1];
+    if (last && g.measureText(`${last} ${word}`).width <= colW) lines[lines.length - 1] = `${last} ${word}`;
+    else lines.push(word);
+  }
+  const lineH = size * 1.15;
+  const linkSize = 13.5 * S, linkGap = 8 * S;
+  const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
+  const top = (canvas.height - textH) / 2;
+  const cx = colX + colW / 2;
+  g.fillStyle = "#2f2b20";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  lines.forEach((line, i) => g.fillText(line, cx, top + lineH * (i + 0.5), colW));
+  if (hasLink) {
+    g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
+    g.fillStyle = "#44563a";
+    const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
+    const label = "Open the recipe";
+    g.fillText(label, cx - 8 * S, y);
+    const w = g.measureText(label).width + 20 * S;
+    g.fillRect(cx - 8 * S - w / 2 + 10 * S, y + linkSize * 0.75, w, 1.5 * S);
+  }
+  return canvas;
+}
+
 function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false) {
+  if (withPhoto) return writeNameWithPhoto(name, photo, hasLink);
   const canvas = document.createElement("canvas");
   canvas.width = 1200; canvas.height = 880;
   const g = canvas.getContext("2d")!;

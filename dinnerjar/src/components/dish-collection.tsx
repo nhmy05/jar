@@ -44,7 +44,7 @@ export function DishCollection({ dishes, onSelect, onAdd, onRemove, isFull }: {
         </div> : <>
           <button className="slip-open" onClick={() => onSelect(dish)} aria-label={`Edit ${dish.name}`}>
             <span className="collection-slip-name">{dish.name}</span>
-            {dish.photoUrl && <span className="collection-photo"><Image src={dish.photoUrl} alt="" width={260} height={120} unoptimized /></span>}
+            {dish.photoUrl && <span className="collection-photo"><Image src={dish.photoUrl} alt="" width={260} height={260} unoptimized /></span>}
             {dish.recipeUrl && <span className="collection-slip-meta"><Icon name="link" size={12} /> recipe link</span>}
           </button>
           {onRemove && <button className="icon-button slip-remove" onClick={() => setConfirmId(dish.id)} aria-label={`Take ${dish.name} out of the jar`}><Icon name="trash" size={15} /></button>}

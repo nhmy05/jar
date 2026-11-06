@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { topSpot, type JarPhase } from "@/components/jar-illustration";
 import { FOLD_SECONDS, type FoldMotion } from "@/components/folding-note";
 import { PILE } from "@/lib/pile";
+import { photoNameSize } from "@/lib/note-layout";
 import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
 import { DishForm, type NewDish } from "@/components/dish-form";
@@ -210,6 +211,7 @@ export function DinnerJar() {
       <Link className="brand" href="/" aria-label="The dinner jar home"><JarLogo /><span>the dinner jar<span className="brand-period">.</span></span></Link>
       <nav className="header-nav" aria-label="Main navigation">
         <button className="help-link" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
+        <button className="help-round" onClick={() => setModal("help")} disabled={isBusy} aria-label="How it works" title="How it works">?</button>
         <span className="nav-divider" />
         <button className="collection-button" onClick={() => setModal("collection")} disabled={isBusy}><Icon name="book" size={17} /><span>My dishes</span><span className="collection-count">{dishes.length}</span></button>
       </nav>
@@ -220,7 +222,6 @@ export function DinnerJar() {
         <Doodles group="hero" />
         <h1 id="hero-title">Can’t decide? <em>Ask the jar</em></h1>
         <p>Write down dishes you’ve cooked and loved, fold them in,<br className="desktop-break" /> and pull one out whenever you need an idea.</p>
-        <button className="help-link help-link-phone" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
       </section>
 
       <section className="jar-scene" aria-label="Your dinner jar">
@@ -253,9 +254,9 @@ export function DinnerJar() {
     {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={isOwner ? removeDish : undefined} isFull={isFull} /></Dialog>}
     {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}`}>
       <div className="picked-slip">
-        <div className="picked-content">
-          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="560px" /></div>}
-          <div className="picked-caption">
+        <div className={`picked-content${selected.photoUrl ? " has-photo" : ""}`}>
+          {selected.photoUrl && <div className="picked-photo"><Image src={selected.photoUrl} alt={selected.name} fill unoptimized sizes="340px" /></div>}
+          <div className="picked-caption" style={selected.photoUrl ? { "--name-size": `${(photoNameSize(selected.name) * 100).toFixed(2)}cqw` } as CSSProperties : undefined}>
             <h2 id="picked-title">{selected.name}</h2>
             {selected.recipeUrl && isWebUrl(selected.recipeUrl) ? <a className="recipe-link" href={selected.recipeUrl} target="_blank" rel="noopener noreferrer">Open the recipe<Icon name="external" size={13} /></a> : null}
           </div>

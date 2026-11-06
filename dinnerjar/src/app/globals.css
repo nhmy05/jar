@@ -50,7 +50,7 @@ svg { flex-shrink: 0; }
 .header-nav { display: flex; align-items: center; gap: 18px; }
 .help-link { background: none; color: var(--ink-soft); font-size: 13px; padding: 8px 0; text-decoration: underline; text-decoration-color: #d9c890; text-underline-offset: 4px; transition: color .2s; }
 .help-link:hover { color: var(--ink); }
-.help-link-phone { display: none; }
+.help-round { display: none; width: 30px; height: 30px; padding: 0; border-radius: 50%; background: #fffcf0; border: 1px solid var(--line); box-shadow: 0 2px 0 #eadfae; color: var(--ink-soft); font-family: var(--font-serif), Georgia, serif; font-size: 17px; line-height: 1; justify-content: center; align-items: center; }
 .nav-divider { height: 18px; width: 1px; background: var(--line); }
 .collection-button { display: flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px 8px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 2px 0 #f1e2ad; transition: transform .2s, box-shadow .2s; }
 .collection-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 0 #ecd99a; }
@@ -135,7 +135,7 @@ svg { flex-shrink: 0; }
 .photo-dropzone small { color: #a1a38c; font-size: 12px; display: block; margin-top: 3px; }
 .photo-dropzone > svg { color: #a3ae8a; }
 .photo-preview { display: flex; align-items: center; gap: 14px; padding: 8px; border: 1px solid #dedfca; border-radius: 9px; background: #fafbf1; }
-.photo-preview img { width: 82px; height: 72px; object-fit: cover; border-radius: 8px; }
+.photo-preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; }
 .photo-preview > div { flex: 1; }
 .photo-preview strong { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; color: #717e5c; }
 .submit-dish { width: 100%; margin-top: 6px; }
@@ -166,7 +166,7 @@ svg { flex-shrink: 0; }
 .slip-open { display: flex; flex-direction: column; align-items: flex-start; width: 100%; height: 100%; min-height: 104px; padding: 14px 14px 12px; background: none; text-align: left; }
 .collection-slip-name { font-family: var(--font-handwriting), cursive; font-size: 19px; font-weight: 500; line-height: 1.2; color: #3f3a2c; overflow-wrap: anywhere; padding-right: 18px; }
 .collection-slip-meta { margin-top: auto; padding-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #80816b; }
-.collection-photo { display: block; width: 100%; height: 78px; margin-top: 8px; overflow: hidden; border-radius: 2px; }
+.collection-photo { display: block; width: 100%; aspect-ratio: 1; height: auto; margin-top: 8px; overflow: hidden; border-radius: 2px; }
 .collection-photo img { width: 100%; height: 100%; object-fit: cover; }
 .slip-remove { position: absolute; right: 4px; top: 4px; width: 28px; height: 28px; opacity: 0; transition: opacity .2s; background: rgba(255,254,250,.85); }
 .collection-slip:hover .slip-remove, .slip-remove:focus-visible { opacity: 1; }
@@ -182,7 +182,7 @@ svg { flex-shrink: 0; }
 .modal-scrim:has(.picked-dialog) { background: rgba(57,63,40,.34); }
 .picked-dialog { background: transparent; border: 0; box-shadow: none; width: min(588px, calc((100dvh - 200px) / .733 + 28px)); padding: 24px 14px 8px; overflow: visible; }
 .picked-dialog .dialog-close { right: 2px; top: -6px; background: #fffcf0; box-shadow: 0 2px 6px rgba(48,56,31,.15); }
-.picked-slip { position: relative; aspect-ratio: 3 / 2.2; width: 100%; display: flex; background: var(--note); border: 1px solid rgba(142,125,73,.15); box-shadow: 2px 7px 15px rgba(69,64,34,.12), 0 22px 42px rgba(63,68,42,.07); transform: none; transform-origin: center; animation: unfold-slip .9s cubic-bezier(.3,.7,.2,1) both; }
+.picked-slip { position: relative; container-type: inline-size; aspect-ratio: 3 / 2.2; width: 100%; display: flex; background: var(--note); border: 1px solid rgba(142,125,73,.15); box-shadow: 2px 7px 15px rgba(69,64,34,.12), 0 22px 42px rgba(63,68,42,.07); transform: none; transform-origin: center; animation: unfold-slip .9s cubic-bezier(.3,.7,.2,1) both; }
 .picked-content { position: relative; flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 0; text-align: center; animation: picked-content-in .9s ease both; }
 .picked-footer { position: absolute; left: 20px; right: 18px; bottom: 14px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; font-size: 12px; color: var(--ink-soft); animation: picked-content-in .9s ease both; }
 .picked-footer > svg { color: #8a7a4c; }
@@ -201,6 +201,11 @@ svg { flex-shrink: 0; }
 .picked-caption { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 24px; text-align: center; }
 .picked-caption h2 { margin: 0; font-size: 52px; }
 .picked-photo + .picked-caption h2 { font-size: 34px; }
+/* photo note: square photo left, name right. Same numbers as lib/note-layout.ts (in cqw = % of note width) */
+.picked-content.has-photo { flex-direction: row; align-items: center; padding: 0 3.6cqw; gap: 3cqw; }
+.has-photo .picked-photo { width: 60cqw; height: 60cqw; }
+.has-photo .picked-caption { width: 30.4cqw; flex: none; padding: 0; }
+.picked-content.has-photo .picked-caption h2 { font-size: var(--name-size); }
 .picked-caption .recipe-link { margin-top: 4px; padding: 2px 0; }
 .recipe-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 4px 0; border-bottom: 1.5px solid #44563a; font-size: 13.5px; font-weight: 600; color: #44563a; transition: color .2s; }
 .recipe-link:hover { color: var(--green-dark); }
@@ -251,8 +256,9 @@ svg { flex-shrink: 0; }
   .site-header { width: calc(100% - 32px); height: 68px; }
   .brand { font-size: 23px; gap: 6px; }
   .brand-mark { width: 30px; height: 30px; }
-  .help-link:not(.help-link-phone), .nav-divider { display: none; }
-  .help-link-phone { display: inline-block; margin-top: 6px; }
+  .help-link, .nav-divider { display: none; }
+  .help-round { display: inline-flex; }
+  .header-nav { gap: 10px; }
   .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; }
   .main-scene { width: calc(100% - 32px); }
   .hero { padding-top: 22px; }
@@ -274,7 +280,6 @@ svg { flex-shrink: 0; }
   .collection-toolbar input { font-size: 16px; }
   .picked-dialog { padding: 24px 6px 8px; align-self: center; }
   .picked-caption h2 { font-size: 38px; }
-  .picked-photo + .picked-caption h2 { font-size: 30px; }
   .toast { bottom: 16px; font-size: 12px; }
 }
 @media (min-width: 641px) and (max-height: 820px) {

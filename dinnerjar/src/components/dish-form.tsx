@@ -17,15 +17,17 @@ async function preparePhoto(file: File): Promise<string> {
     const image = new window.Image();
     image.src = source;
     await image.decode();
-    const scale = Math.min(1, 1000 / Math.max(image.width, image.height));
+    /* crop to a square from the centre, at most 1000 x 1000 */
+    const side = Math.min(image.width, image.height);
+    const size = Math.min(1000, side);
     const canvas = document.createElement("canvas");
-    canvas.width = Math.round(image.width * scale);
-    canvas.height = Math.round(image.height * scale);
+    canvas.width = size;
+    canvas.height = size;
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Your photo couldn’t be prepared. Please try another photo.");
     context.fillStyle = "#fffdf2";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, size, size);
+    context.drawImage(image, (image.width - side) / 2, (image.height - side) / 2, side, side, 0, 0, size, size);
     let quality = 0.82;
     let data = canvas.toDataURL("image/jpeg", quality);
     while (data.length > MAX_PHOTO_CHARS && quality > 0.3) {
@@ -85,7 +87,7 @@ export function DishForm({ onSave, initial }: { onSave: (dish: NewDish) => Promi
       <div className="field-group">
         <label htmlFor="dish-photo">Photo <span className="optional">optional</span></label>
         <input id="dish-photo" ref={fileInput} type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" disabled={saving || processing} tabIndex={-1} onChange={(event) => { void handlePhoto(event.target.files?.[0]); event.target.value = ""; }} />
-        {photoUrl ? <div className="photo-preview"><Image src={photoUrl} alt="Preview of your dish" width={82} height={72} unoptimized /><div><strong>Looks delicious.</strong><button type="button" className="text-button" onClick={() => fileInput.current?.click()} disabled={processing || saving}>Change photo</button></div><button type="button" className="icon-button" onClick={() => setPhotoUrl(null)} aria-label="Remove photo" disabled={saving}><Icon name="close" size={17} /></button></div> : <button type="button" className={`photo-dropzone ${dragging ? "is-dragging" : ""}`} onClick={() => fileInput.current?.click()} disabled={saving || processing} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handlePhoto(event.dataTransfer.files[0]); }}>
+        {photoUrl ? <div className="photo-preview"><Image src={photoUrl} alt="Preview of your dish" width={72} height={72} unoptimized /><div><strong>Looks delicious.</strong><button type="button" className="text-button" onClick={() => fileInput.current?.click()} disabled={processing || saving}>Change photo</button></div><button type="button" className="icon-button" onClick={() => setPhotoUrl(null)} aria-label="Remove photo" disabled={saving}><Icon name="close" size={17} /></button></div> : <button type="button" className={`photo-dropzone ${dragging ? "is-dragging" : ""}`} onClick={() => fileInput.current?.click()} disabled={saving || processing} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handlePhoto(event.dataTransfer.files[0]); }}>
           <span className="upload-icon"><Icon name={processing ? "refresh" : "image"} size={22} className={processing ? "spin" : ""} /></span>
           <span><strong>{processing ? "Getting your photo ready…" : "Choose from your gallery"}</strong><small>or drop it here · JPG, PNG, WebP</small></span><Icon name="plus" size={18} />
         </button>}
