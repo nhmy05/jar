@@ -254,12 +254,13 @@ svg { flex-shrink: 0; }
 }
 @media (max-width: 640px) {
   .site-header { width: calc(100% - 32px); height: 68px; }
-  .brand { font-size: 23px; gap: 6px; }
+  .brand { font-size: 20px; gap: 6px; white-space: nowrap; }
   .brand-mark { width: 30px; height: 30px; }
   .help-link, .nav-divider { display: none; }
   .help-round { display: inline-flex; }
   .header-nav { gap: 10px; }
-  .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; }
+  .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; white-space: nowrap; }
+  .collection-button svg { display: none; }
   .main-scene { width: calc(100% - 32px); }
   .hero { padding-top: 22px; }
   .hero h1 { font-size: 38px; letter-spacing: -1px; }
