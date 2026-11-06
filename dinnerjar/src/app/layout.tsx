@@ -9,10 +9,13 @@ const serif = DM_Serif_Display({ subsets: ["latin"], weight: "400", style: ["nor
 const handwriting = Mali({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600"], variable: "--font-handwriting", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3457"),
   title: "The Dinner Jar",
   description: "A glass jar of dishes you’ve cooked and loved. Write one on a note, drop it in, and pull one out when you can’t decide what to make.",
   applicationName: "The Dinner Jar",
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  openGraph: { title: "The Dinner Jar", description: "Can’t decide? Ask the jar.", siteName: "The Dinner Jar", type: "website" },
+  twitter: { card: "summary_large_image", title: "The Dinner Jar", description: "Can’t decide? Ask the jar." },
   appleWebApp: { capable: true, title: "Dinner Jar", statusBarStyle: "default" },
 };
 
