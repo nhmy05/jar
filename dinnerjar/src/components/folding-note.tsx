@@ -23,7 +23,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { NOTE_POSES } from "@/lib/pile";
-import { LINK_SIZE, PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, CARD_RADIUS, PHOTO_SIZE, PHOTO_TOP, TEXT_HEIGHT, TEXT_TOP, TEXT_WIDTH, photoNameSize, plainNameSize } from "@/lib/note-layout";
+import { PHOTO_LEFT, PHOTO_NOTE_ASPECT, PHOTO_RADIUS, CARD_RADIUS, PHOTO_SIZE, PHOTO_TOP, loadNoteFont } from "@/lib/note-layout";
+import { drawNoteText } from "@/lib/note-text";
 
 export const FOLD_SECONDS = 3.3;
 /** Pulling a note out: lift it out of the jar, then unfold it as it grows toward you. */
@@ -96,63 +97,26 @@ function plainPaper(tall = false) {
 /* Every note is the same tall card. With a photo: square photo with an even white border at
    the top, name (and link) centred below. Without: name centred on the card.
    Same numbers as the picked card (lib/note-layout). */
-function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false) {
+function writeName(name: string, photo: HTMLImageElement | null = null, hasLink = false, withPhoto = false, width = 1200) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1200; canvas.height = Math.round(1200 * PHOTO_NOTE_ASPECT);
+  canvas.width = width; canvas.height = Math.round(width * PHOTO_NOTE_ASPECT);
   const W = canvas.width;
   const g = canvas.getContext("2d")!;
   paperEdge(g, W, canvas.height, CARD_RADIUS * W);
-  const family = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
   const px = PHOTO_LEFT * W, py = PHOTO_TOP * W, side = PHOTO_SIZE * W;
   if (withPhoto) {
-  g.save();
-  g.beginPath(); g.roundRect(px, py, side, side, PHOTO_RADIUS * W); g.clip();
-  if (photo && photo.naturalWidth) {
-    const crop = Math.min(photo.naturalWidth, photo.naturalHeight);
-    g.drawImage(photo, (photo.naturalWidth - crop) / 2, (photo.naturalHeight - crop) / 2, crop, crop, px, py, side, side);
-  } else {
-    g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
-  }
-  g.restore();
-  }
-  const colW = TEXT_WIDTH * W;
-  const size = (withPhoto ? photoNameSize(name) : plainNameSize(name)) * W;
-  g.font = `600 ${size}px ${family}`;
-  /* wrap word by word with lines of even length, like the card does (text-wrap: balance) */
-  const wrap = (width: number) => {
-    const out: string[] = [];
-    for (const word of name.trim().split(/\s+/)) {
-      const last = out[out.length - 1];
-      if (last && g.measureText(`${last} ${word}`).width <= width) out[out.length - 1] = `${last} ${word}`;
-      else out.push(word);
+    g.save();
+    g.beginPath(); g.roundRect(px, py, side, side, PHOTO_RADIUS * W); g.clip();
+    if (photo && photo.naturalWidth) {
+      const crop = Math.min(photo.naturalWidth, photo.naturalHeight);
+      g.drawImage(photo, (photo.naturalWidth - crop) / 2, (photo.naturalHeight - crop) / 2, crop, crop, px, py, side, side);
+    } else {
+      g.fillStyle = "#f1ede0"; g.fillRect(px, py, side, side);
     }
-    return out;
-  };
-  let lines = wrap(colW);
-  for (let width = colW * 0.97; width > colW * 0.4; width *= 0.97) {
-    const tighter = wrap(width);
-    if (tighter.length > lines.length) break;
-    lines = tighter;
+    g.restore();
   }
-  const lineH = size * 1.15;
-  const linkSize = LINK_SIZE * W, linkGap = 0.012 * W, iconRoom = 0.014 * W;
-  const textH = lines.length * lineH + (hasLink ? linkGap + linkSize * 1.3 : 0);
-  const areaTop = withPhoto ? TEXT_TOP * W : 0, areaH = withPhoto ? TEXT_HEIGHT * W : canvas.height;
-  const top = areaTop + (areaH - textH) / 2;
-  const cx = W / 2;
-  g.fillStyle = "#2f2b20";
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  lines.forEach((line, i) => g.fillText(line, cx, top + lineH * (i + 0.5), colW));
-  if (hasLink) {
-    g.font = `600 ${linkSize}px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
-    g.fillStyle = "#44563a";
-    const y = top + lines.length * lineH + linkGap + linkSize * 0.65;
-    const label = "Open the recipe";
-    g.fillText(label, cx - iconRoom, y);
-    const w = g.measureText(label).width + iconRoom * 2.5;
-    g.fillRect(cx - iconRoom - w / 2 + iconRoom * 1.25, y + linkSize * 0.75, w, 0.003 * W);
-  }
+  /* the same drawing the picked card shows, so the swap at the end is seamless */
+  drawNoteText(g, W, name, { hasLink, withPhoto });
   return canvas;
 }
 
@@ -198,9 +162,9 @@ function addLights(scene: THREE.Scene) {
   return set;
 }
 
-function makeNote(name: string, photoUrl: string | null = null, hasLink = false, tall = true) {
+function makeNote(name: string, photoUrl: string | null = null, hasLink = false, tall = true, texWidth = 1200) {
   let photo: HTMLImageElement | null = null;
-  const nameCanvas = writeName(name, null, hasLink, !!photoUrl);
+  const nameCanvas = writeName(name, null, hasLink, !!photoUrl, texWidth);
   const frontTex = new THREE.CanvasTexture(nameCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
   frontTex.anisotropy = 8;
@@ -240,7 +204,7 @@ function makeNote(name: string, photoUrl: string | null = null, hasLink = false,
   }
 
   function redraw() {
-    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, !!photoUrl), 0, 0);
+    nameCanvas.getContext("2d")!.drawImage(writeName(name, photo, hasLink, !!photoUrl, texWidth), 0, 0);
     frontTex.needsUpdate = true;
   }
 
@@ -346,7 +310,13 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
     camera.lookAt(0, 4.5, 0);
     const setLight = addLights(scene);
 
-    const note = makeNote(motion.name, motion.photoUrl ?? null, !!motion.hasLink);
+    /* picking and putting back: draw the note at the picked card's exact screen pixels, so
+       where the two meet, one texture pixel is one screen pixel and the text is as crisp as
+       the card's (offsetWidth ignores the popup's own entry scale) */
+    const slip = document.querySelector<HTMLElement>(".picked-dialog .picked-slip");
+    const cardPx = motion.from?.width ?? slip?.offsetWidth ?? 0;
+    const texWidth = motion.mode !== "drop" && cardPx > 0 ? Math.round(cardPx * renderer.getPixelRatio()) : 1200;
+    const note = makeNote(motion.name, motion.photoUrl ?? null, !!motion.hasLink, true, texWidth);
     scene.add(note.turn);
 
     /* held in the middle, above the jar's opening, while it's written and folded; then let go,
@@ -523,14 +493,22 @@ export function FoldingNote({ motion, onDone, onMidway, onReady }: { motion: Fol
     play(0);
     ready.current?.();
 
-    let frame = 0, start = 0, finished = false;
-    const fonts = document.fonts?.ready ?? Promise.resolve();
+    let frame = 0, lastNow = 0, elapsed = 0, finished = false;
+    /* a stall (e.g. mounting the popup, moving the canvas to the overlay) can delay a frame by
+       a lot; cap how far one step can move the clock so the note pauses through it instead of
+       jumping straight to a later point in the motion */
+    const MAX_STEP = 1 / 30;
+    /* the note's text needs the bold handwriting font, with the letters in this name (accents
+       live in their own font file). The browser only fetches it once something asks for it, so
+       ask here: drawing before it arrives uses a smaller stand-in font that jumps on landing */
+    const fonts = loadNoteFont(motion.name);
     fonts.then(() => {
       if (finished) return;
       note.redraw();
       const tick = (now: number) => {
-        if (!start) start = now;
-        const elapsed = (now - start) / 1000;
+        if (!lastNow) lastNow = now;
+        elapsed += Math.min((now - lastNow) / 1000, MAX_STEP);
+        lastNow = now;
         play(elapsed);
         if (elapsed >= length) { finished = true; done.current(); return; }
         frame = requestAnimationFrame(tick);

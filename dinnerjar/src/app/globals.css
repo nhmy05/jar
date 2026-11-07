@@ -164,7 +164,8 @@ svg { flex-shrink: 0; }
 .collection-slip:nth-child(3n+1) { transform: rotate(.6deg); }
 .collection-slip:hover { transform: translateY(-2px) rotate(0); box-shadow: 2px 6px 12px rgba(84,83,57,.12); }
 .slip-open { display: flex; flex-direction: column; align-items: flex-start; width: 100%; height: 100%; min-height: 104px; padding: 14px 14px 12px; background: none; text-align: left; }
-.collection-slip-name { font-family: var(--font-handwriting), cursive; font-size: 19px; font-weight: 500; line-height: 1.2; color: #3f3a2c; overflow-wrap: anywhere; padding-right: 18px; }
+.slip-open:not(:has(.collection-photo)) { justify-content: center; }
+.collection-slip-name { display: flex; align-items: center; justify-content: center; width: 100%; text-align: center; font-family: var(--font-handwriting), cursive; font-size: 19px; font-weight: 500; line-height: 1.2; min-height: 2.4em; color: #3f3a2c; overflow-wrap: anywhere; padding-right: 18px; }
 .collection-slip-meta { margin-top: auto; padding-top: 8px; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #80816b; }
 .collection-photo { display: block; width: 100%; aspect-ratio: 1; height: auto; margin-top: 8px; overflow: hidden; border-radius: 2px; }
 .collection-photo img { width: 100%; height: 100%; object-fit: cover; }
@@ -193,6 +194,10 @@ svg { flex-shrink: 0; }
 .picked-dialog.arriving .picked-slip { visibility: hidden; }
 .from-pull .picked-actions, .from-pull .dialog-close { transition: opacity .4s ease .08s, transform .4s cubic-bezier(.16,1,.3,1) .08s; }
 .picked-dialog.arriving .picked-actions, .picked-dialog.arriving .dialog-close { opacity: 0; transform: translateY(10px); }
+/* mounted ahead of the reveal, so the first render (photo, custom font) isn't on the critical
+   path when the note actually unfolds; fully invisible until that moment */
+.picked-dialog.prewarm { visibility: hidden; pointer-events: none; }
+.modal-scrim:has(.picked-dialog.prewarm) { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; animation: none; }
 .fold-overlay { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
 .fold-overlay canvas { display: block; width: 100% !important; height: 100% !important; filter: drop-shadow(0 1px 3px rgba(110,100,70,.16)); }
 .picked-slip h2 { font-family: var(--font-handwriting), cursive; font-size: 40px; line-height: 1.15; margin: 10px 0 14px; color: #2f2b20; font-weight: 600; letter-spacing: -.5px; overflow-wrap: anywhere; }
@@ -300,3 +305,8 @@ svg { flex-shrink: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .doodle, .jar-sparkles { animation: none !important; }
 }
+
+/* the picked card's recipe link: a click area over its drawing (see note-name.tsx) */
+.recipe-hit { border-radius: 4px; }
+.recipe-hit:hover { background: rgba(68,86,58,.06); }
+.recipe-hit:focus-visible { outline: 2px solid var(--green-dark); outline-offset: 2px; }

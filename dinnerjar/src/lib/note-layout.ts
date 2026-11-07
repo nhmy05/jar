@@ -27,3 +27,14 @@ export function plainNameSize(name: string) {
   const length = name.trim().length;
   return length <= 14 ? 0.11 : length <= 30 ? 0.09 : 0.075;
 }
+
+/** Load the fonts a note's text is drawn with, for the letters in `name`. Never rejects. */
+export function loadNoteFont(name: string) {
+  if (typeof document === "undefined" || !document.fonts) return Promise.resolve();
+  const hand = getComputedStyle(document.documentElement).getPropertyValue("--font-handwriting").trim() || "cursive";
+  const body = getComputedStyle(document.body).fontFamily || "sans-serif";
+  return Promise.all([
+    document.fonts.load(`600 40px ${hand}`, name || "a"),
+    document.fonts.load(`600 16px ${body}`, "Open the recipe"),
+  ]).catch(() => undefined).then(() => document.fonts.ready).then(() => undefined);
+}
