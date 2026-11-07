@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { DM_Sans, DM_Serif_Display, Mali } from "next/font/google";
+import { DM_Sans, DM_Serif_Display, Shantell_Sans } from "next/font/google";
 import "./globals.css";
 
 const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 const serif = DM_Serif_Display({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif", display: "swap" });
 /* handwriting for dish names; has Vietnamese accents */
-const handwriting = Mali({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600"], variable: "--font-handwriting", display: "swap" });
+const handwriting = Shantell_Sans({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600"], variable: "--font-handwriting", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3457"),
