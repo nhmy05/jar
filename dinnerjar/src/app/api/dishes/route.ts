@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if ((await store.count(jarId)) >= MAX_DISHES) {
       return NextResponse.json({ error: "The jar is full. Take a note out to make room." }, { status: 409 });
     }
-    const dish = await store.add(jarId, input);
+    const dish = await store.add(jarId, { ...input, photoUrl: input.photoUrl ?? null });
     return NextResponse.json({ dish }, { status: 201 });
   } catch (error) {
     console.error("Could not save a dish:", error);

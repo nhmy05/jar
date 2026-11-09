@@ -119,6 +119,7 @@ export function DinnerJar() {
         body: JSON.stringify(input),
       });
       saved = true;
+      if (dish.photoUrl) new window.Image().src = dish.photoUrl;
       setModal(null);
       setPhase("adding");
       setAnnouncement(`Folding ${dish.name} and dropping it into the jar.`);
@@ -172,6 +173,8 @@ export function DinnerJar() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exceptId: selected?.id || null }),
       });
+      /* start downloading the photo now, so it's ready when the note unfolds */
+      if (dish.photoUrl) new window.Image().src = dish.photoUrl;
       setSelected(dish);
       /* mount the popup now, hidden, so its first render (photo, custom font) happens while
          the note is still rising, instead of blocking the moment it's revealed */

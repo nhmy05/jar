@@ -1,6 +1,7 @@
 export type Dish = {
   id: string;
   name: string;
+  /** Short address of the photo, e.g. /api/dishes/<id>/photo?v=ab12cd34. The photo itself is only downloaded when shown. */
   photoUrl: string | null;
   recipeUrl: string | null;
 };
@@ -25,10 +26,17 @@ export function isWebUrl(value: string) {
 
 export const MAX_PHOTO_CHARS = 1_400_000;
 
+/** What the app sends back for a photo it already has: "leave it as it is". */
+const KEEP_PHOTO = /^\/api\/dishes\/[0-9a-f-]{36}\/photo(\?[A-Za-z0-9=&_-]*)?$/i;
+
+/**
+ * photoUrl: a new photo (data:image...), null to have no photo, or undefined to keep the
+ * current one (the app sent back the photo's address unchanged).
+ */
 export function validateDishInput(input: unknown): {
   name: string;
   recipeUrl: string | null;
-  photoUrl: string | null;
+  photoUrl: string | null | undefined;
 } {
   if (!input || typeof input !== "object") throw new Error("Please fill in your dish details.");
   const body = input as Record<string, unknown>;
@@ -38,7 +46,9 @@ export function validateDishInput(input: unknown): {
   if (recipeUrl.length > 2048 || (recipeUrl && !isWebUrl(recipeUrl))) {
     throw new Error("Please use a full recipe link starting with https:// or http://.");
   }
-  const photoUrl = typeof body.photoUrl === "string" ? body.photoUrl : null;
+  const sent = typeof body.photoUrl === "string" ? body.photoUrl : null;
+  if (sent && KEEP_PHOTO.test(sent)) return { name, recipeUrl: recipeUrl || null, photoUrl: undefined };
+  const photoUrl = sent;
   if (
     photoUrl &&
     (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photoUrl) || photoUrl.length > MAX_PHOTO_CHARS)
