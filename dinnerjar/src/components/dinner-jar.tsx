@@ -10,6 +10,7 @@ import { loadNoteFont } from "@/lib/note-layout";
 import { NoteName } from "@/components/note-name";
 import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
+import { AccountButton } from "@/components/account-button";
 import { DishForm, type NewDish } from "@/components/dish-form";
 import { DishCollection } from "@/components/dish-collection";
 import { Doodles, JarLogo } from "@/components/doodles";
@@ -230,6 +231,7 @@ export function DinnerJar() {
         <button className="help-link" onClick={() => setModal("help")} disabled={isBusy}>How it works</button>
         <span className="nav-divider" />
         <button className="collection-button" onClick={() => setModal("collection")} disabled={isBusy}><Icon name="book" size={17} /><span>My dishes</span><span className="collection-count">{dishes.length}</span></button>
+        <AccountButton disabled={isBusy} />
       </nav>
     </header>
 
