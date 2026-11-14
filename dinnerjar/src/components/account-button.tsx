@@ -22,7 +22,7 @@ export function AccountButton({ disabled }: { disabled?: boolean }) {
   return <>
     <span className="nav-divider" />
     {me.user
-      ? <button className="help-link" onClick={() => void signOut({ callbackUrl: "/" })} disabled={disabled} title={me.user.email ?? undefined}>Sign out</button>
-      : <button className="help-link" onClick={() => void signIn("google", { callbackUrl: "/" })} disabled={disabled}>Sign in</button>}
+      ? <button className="help-link account-link" onClick={() => void signOut({ callbackUrl: "/" })} disabled={disabled} title={me.user.email ?? undefined}>Sign out</button>
+      : <button className="help-link account-link" onClick={() => void signIn("google", { callbackUrl: "/" })} disabled={disabled}>Sign in</button>}
   </>;
 }
