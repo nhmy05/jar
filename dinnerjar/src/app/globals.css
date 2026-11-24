@@ -43,7 +43,7 @@ svg { flex-shrink: 0; }
 @keyframes doodle-bob { 0%, 100% { transform: translate(-50%, -50%) rotate(var(--r)); } 50% { transform: translate(-50%, calc(-50% - 5px)) rotate(calc(var(--r) + 3deg)); } }
 
 .site-header, .main-scene, .site-footer { position: relative; z-index: 1; }
-.site-header { width: calc(100% - 96px); max-width: 1180px; height: 84px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e9e3cf; }
+.site-header { z-index: 5; width: calc(100% - 96px); max-width: 1180px; height: 84px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e9e3cf; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-serif), Georgia, serif; font-size: 28px; font-weight: 400; letter-spacing: -.6px; color: #3d4a33; }
 .brand-mark { color: #3d4a33; }
 .brand-period { color: var(--gold); }
