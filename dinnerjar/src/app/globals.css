@@ -284,7 +284,6 @@ svg { flex-shrink: 0; }
 .guest-note > svg { position: absolute; right: 18px; top: 2px; color: #8a7a4c; transform: scaleY(-1) rotate(-12deg); }
 .guest-note > span { position: absolute; right: 70px; top: 22px; text-align: right; font-family: var(--font-handwriting), cursive; font-size: 18px; line-height: 1.25; color: #8a7a4c; white-space: nowrap; }
 .note-close { position: absolute; right: -4px; top: 44px; background: none; color: #b5a878; font-size: 18px; line-height: 1; padding: 0 4px; }
-  .strip-long { display: none; }
     .brand, .collection-button { white-space: nowrap; }
   .collection-button { font-size: 12px; padding: 6px 8px 6px 11px; }
   .main-scene { width: calc(100% - 32px); }
