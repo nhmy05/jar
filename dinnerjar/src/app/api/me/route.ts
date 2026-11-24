@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth, signInEnabled } from "@/auth";
+import { isSignedInOwner } from "@/lib/owner";
 
 export const dynamic = "force-dynamic";
 
@@ -8,5 +9,5 @@ export async function GET() {
   if (!signInEnabled) return NextResponse.json({ enabled: false, user: null }, { headers: { "Cache-Control": "no-store" } });
   const session = await auth();
   const user = session?.user ? { name: session.user.name ?? null, email: session.user.email ?? null } : null;
-  return NextResponse.json({ enabled: true, user }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ enabled: true, user, ownsJar: user ? await isSignedInOwner() : false }, { headers: { "Cache-Control": "no-store" } });
 }

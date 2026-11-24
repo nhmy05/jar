@@ -7,6 +7,8 @@ type NewDish = { name: string; recipeUrl: string | null; photoUrl: string | null
 /** photoUrl undefined = keep the photo the dish already has */
 type DishChanges = { name: string; recipeUrl: string | null; photoUrl: string | null | undefined };
 
+export type GoogleProfile = { googleId: string; email: string; name: string | null; picture: string | null };
+
 export interface DishStore {
   /** The one shared jar: the oldest jar, created the first time it is needed. */
   sharedJarId(): Promise<string>;
@@ -16,6 +18,12 @@ export interface DishStore {
   remove(jarId: string, dishId: string): Promise<boolean>;
   update(jarId: string, dishId: string, dish: DishChanges): Promise<Dish | null>;
   pick(jarId: string, exceptId: string | null): Promise<Dish | null>;
+  /** Save or refresh a person who signed in with Google. */
+  upsertUser(profile: GoogleProfile): Promise<{ id: string }>;
+  /** Make `userId` the owner of the shared jar, but only if nobody owns it yet. True when it became theirs. */
+  claimSharedJar(userId: string): Promise<boolean>;
+  /** True when `userId` owns the shared jar. */
+  ownsSharedJar(userId: string): Promise<boolean>;
   /** The photo itself (a data: URL), or null if the dish has none. Only the photo route asks for this. */
   photo(jarId: string, dishId: string): Promise<string | null>;
 }
@@ -37,8 +45,8 @@ const toDish = (row: { id: string; name: string; recipeUrl: string | null }, ver
 
 async function postgresStore(): Promise<DishStore> {
   const { db } = await import("@/db");
-  const { jars, dishes } = await import("@/db/schema");
-  const { and, asc, count, eq, ne, sql } = await import("drizzle-orm");
+  const { jars, dishes, users } = await import("@/db/schema");
+  const { and, asc, count, eq, isNull, ne, sql } = await import("drizzle-orm");
 
   /* everything but the photo; the photo's fingerprint is worked out inside the database, so no photo data is sent */
   const light = {
@@ -88,6 +96,26 @@ async function postgresStore(): Promise<DishStore> {
       await db.update(dishes).set({ lastPickedAt: new Date() }).where(eq(dishes.id, row.id));
       return toDish(row, row.version);
     },
+    async upsertUser(profile) {
+      const values = { googleId: profile.googleId, email: profile.email, name: profile.name, picture: profile.picture };
+      const [row] = await db
+        .insert(users)
+        .values(values)
+        .onConflictDoUpdate({ target: users.googleId, set: { email: values.email, name: values.name, picture: values.picture } })
+        .returning({ id: users.id });
+      return row;
+    },
+    async claimSharedJar(userId) {
+      const [oldest] = await db.select({ id: jars.id, ownerId: jars.ownerId }).from(jars).orderBy(asc(jars.createdAt)).limit(1);
+      if (!oldest || oldest.ownerId) return false;
+      /* the extra isNull check means two sign-ins at once can't both win */
+      const rows = await db.update(jars).set({ ownerId: userId }).where(and(eq(jars.id, oldest.id), isNull(jars.ownerId))).returning({ id: jars.id });
+      return rows.length > 0;
+    },
+    async ownsSharedJar(userId) {
+      const [oldest] = await db.select({ ownerId: jars.ownerId }).from(jars).orderBy(asc(jars.createdAt)).limit(1);
+      return oldest?.ownerId === userId;
+    },
     async photo(jarId, dishId) {
       const [row] = await db
         .select({ photoUrl: dishes.photoUrl })
@@ -121,6 +149,23 @@ async function writeFile(data: FileData) {
   globalForFile.__dinnerJarFile = data;
   await fs.mkdir(path.dirname(FILE), { recursive: true });
   await fs.writeFile(FILE, JSON.stringify(data));
+}
+
+/** Local stand-in for the users and ownership tables, kept beside the dishes in .data/ */
+type AccountsFile = { users: (GoogleProfile & { id: string })[]; owners: Record<string, string> };
+const ACCOUNTS_FILE = path.join(process.cwd(), ".data", "accounts.json");
+
+async function readAccounts(): Promise<AccountsFile> {
+  try {
+    return JSON.parse(await fs.readFile(ACCOUNTS_FILE, "utf8")) as AccountsFile;
+  } catch {
+    return { users: [], owners: {} };
+  }
+}
+
+async function writeAccounts(data: AccountsFile) {
+  await fs.mkdir(path.dirname(ACCOUNTS_FILE), { recursive: true });
+  await fs.writeFile(ACCOUNTS_FILE, JSON.stringify(data));
 }
 
 function fileStore(): DishStore {
@@ -170,6 +215,28 @@ function fileStore(): DishStore {
       const pool = all.length > 1 && exceptId ? all.filter((dish) => dish.id !== exceptId) : all;
       const dish = pool[Math.floor(Math.random() * pool.length)];
       return dish ? show(dish) : null;
+    },
+    async upsertUser(profile) {
+      const data = await readAccounts();
+      const found = data.users.find((user) => user.googleId === profile.googleId);
+      if (found) Object.assign(found, profile);
+      const user = found ?? { id: randomUUID(), ...profile };
+      if (!found) data.users.push(user);
+      await writeAccounts(data);
+      return { id: user.id };
+    },
+    async claimSharedJar(userId) {
+      const [first] = Object.keys(await readFile());
+      if (!first) return false;
+      const data = await readAccounts();
+      if (data.owners[first]) return false;
+      data.owners[first] = userId;
+      await writeAccounts(data);
+      return true;
+    },
+    async ownsSharedJar(userId) {
+      const [first] = Object.keys(await readFile());
+      return !!first && (await readAccounts()).owners[first] === userId;
     },
     async photo(jarId, dishId) {
       return ((await readFile())[jarId] ?? []).find((dish) => dish.id === dishId)?.photoUrl ?? null;

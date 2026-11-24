@@ -1,7 +1,20 @@
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+/** People who signed in with Google. Link holders never get a row here. */
+export const users = pgTable("dinner_users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  googleId: text("google_id").notNull().unique(),
+  email: text("email").notNull(),
+  name: text("name"),
+  picture: text("picture"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const jars = pgTable("dinner_jars", {
   id: uuid("id").defaultRandom().primaryKey(),
+  /** The signed-in user who owns this jar. Empty for a jar nobody has claimed yet. */
+  ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
+  name: text("name"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
