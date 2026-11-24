@@ -333,3 +333,14 @@ svg { flex-shrink: 0; }
   .guest-note > span br { display: none; }
   .note-close { top: 8px; right: -6px; }
 }
+
+.share-dialog { width: 520px; }
+.share-rows { display: grid; gap: 22px; margin: 4px 0 26px; }
+.share-row-head { display: grid; gap: 2px; margin-bottom: 8px; font-size: 13px; }
+.share-row-head strong { font-weight: 600; color: #656e54; }
+.share-row-head span { color: #8b8c77; line-height: 1.5; }
+.share-row-link { display: flex; gap: 8px; }
+.share-row-link input { flex: 1; min-width: 0; min-height: 42px; padding: 0 12px; border: 1px solid #dedfca; border-radius: 9px; background: #fffefa; font-size: 12.5px; color: var(--ink); }
+.share-reset { margin-top: 8px; }
+.share-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; font-size: 12.5px; color: #95603f; }
+.share-confirm span { flex: 1 1 100%; }

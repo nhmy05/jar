@@ -25,7 +25,7 @@ function useMe() {
 }
 
 /** Header: a green "Sign in" button for guests, your initial with a small menu once signed in. Nothing until sign-in is switched on. */
-export function AccountButton({ disabled }: { disabled?: boolean }) {
+export function AccountButton({ disabled, onShare }: { disabled?: boolean; onShare?: () => void }) {
   const me = useMe();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -48,6 +48,7 @@ export function AccountButton({ disabled }: { disabled?: boolean }) {
     <button className="avatar-button" onClick={() => setOpen((value) => !value)} aria-haspopup="menu" aria-expanded={open} aria-label="Your account">{initial}</button>
     {open && <div className="account-popup" role="menu">
       {me.user.email && <div className="account-email">{me.user.email}</div>}
+      {onShare && <button role="menuitem" onClick={() => { setOpen(false); onShare(); }}>Share links</button>}
       <button role="menuitem" onClick={() => void signOut({ callbackUrl: "/" })}>Sign out</button>
     </div>}
   </div>;

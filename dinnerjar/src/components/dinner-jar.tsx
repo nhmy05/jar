@@ -10,6 +10,7 @@ import { loadNoteFont } from "@/lib/note-layout";
 import { NoteName } from "@/components/note-name";
 import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
+import { ShareDialog } from "@/components/share-dialog";
 import { AccountButton, GuestStrip } from "@/components/account-button";
 import { DishForm, type NewDish } from "@/components/dish-form";
 import { DishCollection } from "@/components/dish-collection";
@@ -17,7 +18,7 @@ import { Doodles, JarLogo } from "@/components/doodles";
 import { Icon } from "@/components/icons";
 import { MAX_DISHES, isWebUrl, type Dish } from "@/lib/dishes";
 
-type Modal = "add" | "edit" | "collection" | "picked" | "help" | null;
+type Modal = "add" | "edit" | "collection" | "picked" | "help" | "share" | null;
 
 /* if the motion can't run (no WebGL, script failed to load), carry on anyway */
 const MOTION_SAFETY_MS = FOLD_SECONDS * 1000 + 4000;
@@ -236,7 +237,7 @@ export function DinnerJar({ jarKey }: { jarKey?: string }) {
       <Link className="brand" href="/" aria-label="The dinner jar home"><JarLogo /><span>the dinner jar<span className="brand-period">.</span></span></Link>
       <nav className="header-nav" aria-label="Main navigation">
         <button className="collection-button" onClick={() => setModal("collection")} disabled={isBusy}><Icon name="book" size={17} /><span>My dishes</span><span className="collection-count">{dishes.length}</span></button>
-        <AccountButton disabled={isBusy} />
+        <AccountButton disabled={isBusy} onShare={isOwner ? () => setModal("share") : undefined} />
       </nav>
     </header>
     <GuestStrip />
@@ -292,6 +293,7 @@ export function DinnerJar({ jarKey }: { jarKey?: string }) {
         <button className="button button-primary" onClick={() => void pickDish()}><Icon name="shuffle" size={17} />Pick another</button>
       </div>
     </Dialog>}
+    {modal === "share" && <Dialog key="share" labelId="share-title" onClose={closeModal} className="share-dialog"><ShareDialog jarKey={jarKey} onDone={closeModal} /></Dialog>}
     {modal === "help" && <Dialog key="help" labelId="help-title" onClose={closeModal} className="help-dialog">
       <h2 id="help-title">How the jar works</h2>
       <ol className="help-steps">
@@ -299,7 +301,7 @@ export function DinnerJar({ jarKey }: { jarKey?: string }) {
         <li><span className="step-number">2</span><div><h3>Drop it in</h3><p>Your note is folded and dropped into the jar, so every pull is a surprise.</p></div></li>
         <li><span className="step-number">3</span><div><h3>Pull one out</h3><p>Unfold it to see tonight’s idea. Put it back or pick another. Notes always go back in the jar.</p></div></li>
       </ol>
-      <div className="help-tip"><Icon name="heart" size={17} /><p>This is one shared jar, saved online. Anyone with the link can add dishes, and every dish stays until the jar’s owner takes it out.</p></div>
+      <div className="help-tip"><Icon name="heart" size={17} /><p>Your jar is saved online. Share the edit link and friends can add dishes too. Every dish stays until the jar’s owner takes it out.</p></div>
       <button className="button button-primary help-done" onClick={closeModal}>Got it</button>
     </Dialog>}
     {toast && <div className="toast" role="status"><span className={`toast-check${toastTone === "removed" ? " removed" : ""}`}><Icon name={toastTone === "removed" ? "trash" : "check"} size={toastTone === "removed" ? 14 : 15} /></span>{toast}<button className="icon-button" onClick={() => setToast("")} aria-label="Dismiss notification"><Icon name="close" size={15} /></button></div>}
