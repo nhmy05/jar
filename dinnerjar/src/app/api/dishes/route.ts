@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
-import { getJarId } from "@/lib/bowl";
+import { accessFromRequest, canEdit } from "@/lib/access";
 import { MAX_DISHES, validateDishInput } from "@/lib/dishes";
-import { isOwner } from "@/lib/owner";
 import { getStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+const NO_JAR = { error: "That link doesn’t open a jar. Ask for a new one." };
+const NO_ADD = { error: "This link lets you look and pick, but not add. Ask for the edit link." };
+
+export async function GET(request: Request) {
   try {
-    const jarId = await getJarId();
-    const dishes = await (await getStore()).list(jarId);
-    return NextResponse.json({ dishes, isOwner: await isOwner() }, { headers: { "Cache-Control": "private, no-store" } });
+    const access = await accessFromRequest(request);
+    if (!access) return NextResponse.json(NO_JAR, { status: 404 });
+    const dishes = await (await getStore()).list(access.jarId);
+    return NextResponse.json({ dishes, role: access.role }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Could not load the jar:", error);
     return NextResponse.json({ error: "We couldn’t open your jar. Please try again in a moment." }, { status: 500 });
@@ -19,6 +22,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const access = await accessFromRequest(request);
+    if (!access) return NextResponse.json(NO_JAR, { status: 404 });
+    if (!canEdit(access.role)) return NextResponse.json(NO_ADD, { status: 403 });
     if (Number(request.headers.get("content-length") || 0) > 1_600_000) {
       return NextResponse.json({ error: "That photo is a little too large. Please choose a smaller one." }, { status: 413 });
     }
@@ -34,7 +40,7 @@ export async function POST(request: Request) {
     } catch (error) {
       return NextResponse.json({ error: error instanceof Error ? error.message : "Please check your dish details." }, { status: 400 });
     }
-    const jarId = await getJarId();
+    const jarId = access.jarId;
     const store = await getStore();
     if ((await store.count(jarId)) >= MAX_DISHES) {
       return NextResponse.json({ error: "The jar is full. Take a note out to make room." }, { status: 409 });

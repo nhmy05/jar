@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Dish } from "@/lib/dishes";
@@ -6,6 +6,8 @@ import type { Dish } from "@/lib/dishes";
 type NewDish = { name: string; recipeUrl: string | null; photoUrl: string | null };
 /** photoUrl undefined = keep the photo the dish already has */
 type DishChanges = { name: string; recipeUrl: string | null; photoUrl: string | null | undefined };
+
+export type LinkRole = "view" | "edit";
 
 export type GoogleProfile = { googleId: string; email: string; name: string | null; picture: string | null };
 
@@ -22,14 +24,25 @@ export interface DishStore {
   upsertUser(profile: GoogleProfile): Promise<{ id: string }>;
   /** Make `userId` the owner of the shared jar, but only if nobody owns it yet. True when it became theirs. */
   claimSharedJar(userId: string): Promise<boolean>;
-  /** True when `userId` owns the shared jar. */
-  ownsSharedJar(userId: string): Promise<boolean>;
+  /** True when `userId` owns this jar. */
+  ownsJar(jarId: string, userId: string): Promise<boolean>;
+  /** The jar and role a share link key opens, or null if the key is unknown or reset. */
+  jarForKey(key: string): Promise<{ jarId: string; role: LinkRole } | null>;
+  /** The jar's two share links, created the first time they're asked for. */
+  ensureLinks(jarId: string): Promise<{ view: string; edit: string }>;
+  /** Replace one share link with a new key. The old key stops working. */
+  resetLink(jarId: string, role: LinkRole): Promise<string>;
+  /** Remember that a signed-in person opened this jar through a link (keeps the higher role). */
+  addMember(jarId: string, userId: string, role: LinkRole): Promise<void>;
   /** The photo itself (a data: URL), or null if the dish has none. Only the photo route asks for this. */
-  photo(jarId: string, dishId: string): Promise<string | null>;
+  photo(dishId: string): Promise<string | null>;
 }
 
 /** Small fingerprint of a photo. The photo address changes when the photo does, so browsers never show an old one. */
 export const photoVersion = (data: string) => createHash("md5").update(data).digest("hex").slice(0, 8);
+
+/** A long random key for a share link. */
+const newKey = () => randomBytes(24).toString("base64url");
 
 const photoAddress = (id: string, version: string | null) => (version ? `/api/dishes/${id}/photo?v=${version}` : null);
 
@@ -45,7 +58,7 @@ const toDish = (row: { id: string; name: string; recipeUrl: string | null }, ver
 
 async function postgresStore(): Promise<DishStore> {
   const { db } = await import("@/db");
-  const { jars, dishes, users } = await import("@/db/schema");
+  const { jars, dishes, users, jarLinks, jarMembers } = await import("@/db/schema");
   const { and, asc, count, eq, isNull, ne, sql } = await import("drizzle-orm");
 
   /* everything but the photo; the photo's fingerprint is worked out inside the database, so no photo data is sent */
@@ -112,15 +125,47 @@ async function postgresStore(): Promise<DishStore> {
       const rows = await db.update(jars).set({ ownerId: userId }).where(and(eq(jars.id, oldest.id), isNull(jars.ownerId))).returning({ id: jars.id });
       return rows.length > 0;
     },
-    async ownsSharedJar(userId) {
-      const [oldest] = await db.select({ ownerId: jars.ownerId }).from(jars).orderBy(asc(jars.createdAt)).limit(1);
-      return oldest?.ownerId === userId;
+    async ownsJar(jarId, userId) {
+      const [row] = await db.select({ ownerId: jars.ownerId }).from(jars).where(eq(jars.id, jarId));
+      return row?.ownerId === userId;
     },
-    async photo(jarId, dishId) {
+    async jarForKey(key) {
       const [row] = await db
-        .select({ photoUrl: dishes.photoUrl })
-        .from(dishes)
-        .where(and(eq(dishes.id, dishId), eq(dishes.jarId, jarId)));
+        .select({ jarId: jarLinks.jarId, role: jarLinks.role })
+        .from(jarLinks)
+        .where(and(eq(jarLinks.key, key), isNull(jarLinks.revokedAt)));
+      return row ?? null;
+    },
+    async ensureLinks(jarId) {
+      const live = await db.select({ role: jarLinks.role, key: jarLinks.key }).from(jarLinks).where(and(eq(jarLinks.jarId, jarId), isNull(jarLinks.revokedAt)));
+      const out: Partial<Record<LinkRole, string>> = {};
+      for (const row of live) out[row.role] ??= row.key;
+      for (const role of ["view", "edit"] as const) {
+        if (!out[role]) {
+          out[role] = newKey();
+          await db.insert(jarLinks).values({ jarId, role, key: out[role] });
+        }
+      }
+      return { view: out.view!, edit: out.edit! };
+    },
+    async resetLink(jarId, role) {
+      await db.update(jarLinks).set({ revokedAt: new Date() }).where(and(eq(jarLinks.jarId, jarId), eq(jarLinks.role, role), isNull(jarLinks.revokedAt)));
+      const key = newKey();
+      await db.insert(jarLinks).values({ jarId, role, key });
+      return key;
+    },
+    async addMember(jarId, userId, role) {
+      await db
+        .insert(jarMembers)
+        .values({ jarId, userId, role })
+        .onConflictDoUpdate({
+          target: [jarMembers.jarId, jarMembers.userId],
+          /* an edit link keeps edit even if the same person later opens the view link */
+          set: { role: sql`case when ${jarMembers.role} = 'edit' then 'edit' else ${role} end` },
+        });
+    },
+    async photo(dishId) {
+      const [row] = await db.select({ photoUrl: dishes.photoUrl }).from(dishes).where(eq(dishes.id, dishId));
       return row?.photoUrl ?? null;
     },
   };
@@ -152,14 +197,20 @@ async function writeFile(data: FileData) {
 }
 
 /** Local stand-in for the users and ownership tables, kept beside the dishes in .data/ */
-type AccountsFile = { users: (GoogleProfile & { id: string })[]; owners: Record<string, string> };
+type AccountsFile = {
+  users: (GoogleProfile & { id: string })[];
+  owners: Record<string, string>;
+  links: { jarId: string; role: LinkRole; key: string; revoked?: boolean }[];
+  members: { jarId: string; userId: string; role: LinkRole }[];
+};
 const ACCOUNTS_FILE = path.join(process.cwd(), ".data", "accounts.json");
 
 async function readAccounts(): Promise<AccountsFile> {
   try {
-    return JSON.parse(await fs.readFile(ACCOUNTS_FILE, "utf8")) as AccountsFile;
+    const data = JSON.parse(await fs.readFile(ACCOUNTS_FILE, "utf8")) as Partial<AccountsFile>;
+    return { users: data.users ?? [], owners: data.owners ?? {}, links: data.links ?? [], members: data.members ?? [] };
   } catch {
-    return { users: [], owners: {} };
+    return { users: [], owners: {}, links: [], members: [] };
   }
 }
 
@@ -234,12 +285,43 @@ function fileStore(): DishStore {
       await writeAccounts(data);
       return true;
     },
-    async ownsSharedJar(userId) {
-      const [first] = Object.keys(await readFile());
-      return !!first && (await readAccounts()).owners[first] === userId;
+    async ownsJar(jarId, userId) {
+      return (await readAccounts()).owners[jarId] === userId;
     },
-    async photo(jarId, dishId) {
-      return ((await readFile())[jarId] ?? []).find((dish) => dish.id === dishId)?.photoUrl ?? null;
+    async jarForKey(key) {
+      const link = (await readAccounts()).links.find((item) => item.key === key && !item.revoked);
+      return link ? { jarId: link.jarId, role: link.role } : null;
+    },
+    async ensureLinks(jarId) {
+      const data = await readAccounts();
+      for (const role of ["view", "edit"] as const) {
+        if (!data.links.some((item) => item.jarId === jarId && item.role === role && !item.revoked)) data.links.push({ jarId, role, key: newKey() });
+      }
+      await writeAccounts(data);
+      const find = (role: LinkRole) => data.links.find((item) => item.jarId === jarId && item.role === role && !item.revoked)!.key;
+      return { view: find("view"), edit: find("edit") };
+    },
+    async resetLink(jarId, role) {
+      const data = await readAccounts();
+      for (const item of data.links) if (item.jarId === jarId && item.role === role) item.revoked = true;
+      const key = newKey();
+      data.links.push({ jarId, role, key });
+      await writeAccounts(data);
+      return key;
+    },
+    async addMember(jarId, userId, role) {
+      const data = await readAccounts();
+      const found = data.members.find((item) => item.jarId === jarId && item.userId === userId);
+      if (!found) data.members.push({ jarId, userId, role });
+      else if (found.role !== "edit") found.role = role;
+      await writeAccounts(data);
+    },
+    async photo(dishId) {
+      for (const list of Object.values(await readFile())) {
+        const dish = list.find((item) => item.id === dishId);
+        if (dish) return dish.photoUrl;
+      }
+      return null;
     },
   };
 }

@@ -22,16 +22,23 @@ type Modal = "add" | "edit" | "collection" | "picked" | "help" | null;
 /* if the motion can't run (no WebGL, script failed to load), carry on anyway */
 const MOTION_SAFETY_MS = FOLD_SECONDS * 1000 + 4000;
 
-async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { cache: "no-store", credentials: "same-origin", ...init });
+async function apiRequest<T>(url: string, init?: RequestInit, jarKey?: string): Promise<T> {
+  const headers = new Headers(init?.headers);
+  if (jarKey) headers.set("x-jar-key", jarKey);
+  const response = await fetch(url, { cache: "no-store", credentials: "same-origin", ...init, headers });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Something slipped. Let’s try that again.");
   return data as T;
 }
 
-export function DinnerJar() {
+/** jarKey: the share-link key when opened from /j/<key>; none means the shared home jar. */
+export function DinnerJar({ jarKey }: { jarKey?: string }) {
   const [dishes, setDishes] = useState<Dish[]>([]);
-  const [isOwner, setIsOwner] = useState(false);
+  /** what this visitor may do: view = look and pick, edit = also add and change, owner = also remove */
+  const [role, setRole] = useState<"view" | "edit" | "owner">("view");
+  const isOwner = role === "owner";
+  const canEdit = role !== "view";
+  const api = <T,>(url: string, init?: RequestInit) => apiRequest<T>(url, init, jarKey);
   const [loading, setLoading] = useState(true);
   const [savingDish, setSavingDish] = useState(false);
   const [connectionError, setConnectionError] = useState("");
@@ -64,12 +71,12 @@ export function DinnerJar() {
 
   useEffect(() => {
     const controller = new AbortController();
-    apiRequest<{ dishes: Dish[]; isOwner?: boolean }>("/api/dishes", { signal: controller.signal })
-      .then((data) => { setDishes(data.dishes); setIsOwner(!!data.isOwner); setConnectionError(""); })
+    apiRequest<{ dishes: Dish[]; role?: "view" | "edit" | "owner" }>("/api/dishes", { signal: controller.signal }, jarKey)
+      .then((data) => { setDishes(data.dishes); setRole(data.role ?? "view"); setConnectionError(""); })
       .catch((error) => { if (error.name !== "AbortError") setConnectionError(error.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [reload]);
+  }, [reload, jarKey]);
 
   useEffect(() => {
     if (!toast) return;
@@ -114,7 +121,7 @@ export function DinnerJar() {
     setSavingDish(true);
     let saved = false;
     try {
-      const { dish } = await apiRequest<{ dish: Dish }>("/api/dishes", {
+      const { dish } = await api<{ dish: Dish }>("/api/dishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
@@ -139,7 +146,7 @@ export function DinnerJar() {
   }
 
   async function updateDish(dish: Dish, input: NewDish) {
-    const { dish: updated } = await apiRequest<{ dish: Dish }>(`/api/dishes/${dish.id}`, {
+    const { dish: updated } = await api<{ dish: Dish }>(`/api/dishes/${dish.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
@@ -153,7 +160,7 @@ export function DinnerJar() {
   }
 
   async function removeDish(dish: Dish) {
-    await apiRequest<{ ok: true }>(`/api/dishes/${dish.id}`, { method: "DELETE" });
+    await api<{ ok: true }>(`/api/dishes/${dish.id}`, { method: "DELETE" });
     setDishes((previous) => previous.filter((item) => item.id !== dish.id));
     if (selected?.id === dish.id) setSelected(null);
     setToastTone("removed");
@@ -169,7 +176,7 @@ export function DinnerJar() {
     setPhase("pulling");
     setAnnouncement("Reaching into the jar…");
     try {
-      const { dish } = await apiRequest<{ dish: Dish }>("/api/dishes/pick", {
+      const { dish } = await api<{ dish: Dish }>("/api/dishes/pick", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exceptId: selected?.id || null }),
@@ -254,10 +261,10 @@ export function DinnerJar() {
       <div className="jar-actions">
         <Doodles group="actions" />
         <div className="action-buttons">
-          <button className="button button-secondary" onClick={() => setModal("add")} disabled={isBusy || isFull || !!connectionError}><Icon name="plus" size={19} />Add a dish</button>
+          {canEdit && <button className="button button-secondary" onClick={() => setModal("add")} disabled={isBusy || isFull || !!connectionError}><Icon name="plus" size={19} />Add a dish</button>}
           <button className="button button-primary pick-button" onClick={() => void pickDish()} disabled={isBusy || isEmpty || !!connectionError}><Icon name={phase === "pulling" ? "refresh" : "shuffle"} size={19} className={phase === "pulling" ? "spin" : ""} />{phase === "pulling" ? "Reaching in…" : "Pick a dish"}</button>
         </div>
-        {(isFull || isEmpty) && <p className="action-caption">{isFull ? "The jar is full. Take a note out in My dishes to make room." : "The jar is empty. Add the first dish you’ve cooked."}</p>}
+        {(isFull || isEmpty) && <p className="action-caption">{isFull ? "The jar is full. Take a note out in My dishes to make room." : canEdit ? "The jar is empty. Add the first dish you’ve cooked." : "The jar is empty."}</p>}
       </div>
       {connectionError && <div className="connection-error" role="alert"><p>{connectionError}</p><button className="text-button" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Try again <Icon name="refresh" size={14} /></button></div>}
       {actionError && <div className="connection-error" role="alert"><p>{actionError}</p><button className="icon-button" aria-label="Dismiss error" onClick={() => setActionError("")}><Icon name="close" size={16} /></button></div>}
@@ -270,7 +277,7 @@ export function DinnerJar() {
 
     {modal === "add" && <Dialog key="add" labelId="add-title" onClose={closeModal} className="add-dialog"><DishForm onSave={saveDish} /></Dialog>}
     {modal === "edit" && editing && <Dialog key={`edit-${editing.id}`} labelId="add-title" onClose={closeModal} className="add-dialog" noScrimFade><DishForm initial={editing} onSave={(input) => updateDish(editing, input)} /></Dialog>}
-    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={(dish) => { setEditing(dish); setModal("edit"); }} onAdd={() => setModal("add")} onRemove={isOwner ? removeDish : undefined} isFull={isFull} /></Dialog>}
+    {modal === "collection" && <Dialog key="collection" labelId="collection-title" onClose={closeModal} className="collection-dialog" noScrimFade={!!editing}><DishCollection dishes={dishes} onSelect={canEdit ? (dish) => { setEditing(dish); setModal("edit"); } : undefined} onAdd={canEdit ? () => setModal("add") : undefined} onRemove={isOwner ? removeDish : undefined} isFull={isFull} /></Dialog>}
     {modal === "picked" && selected && <Dialog key={`picked-${selected.id}`} labelId="picked-title" onClose={closeModal} className={`picked-dialog tall${freshPull ? " from-pull" : ""}${arriving ? " arriving" : ""}${prewarm ? " prewarm" : ""}`}>
       <div className="picked-slip">
         <div className={`picked-content${selected.photoUrl ? " has-photo" : ""}`}>
