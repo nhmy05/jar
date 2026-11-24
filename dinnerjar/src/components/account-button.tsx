@@ -55,21 +55,40 @@ export function AccountButton({ disabled }: { disabled?: boolean }) {
 
 const DISMISSED_KEY = "dinnerjar-guest-strip-dismissed";
 
-/** Under the header, for guests only: explains the sample jar. The × hides it on this device. */
+/**
+ * For guests only: explains the sample jar. The × hides it on this device.
+ * Two looks while we compare: a centered pill ("a", default) or a handwritten note by the button ("c").
+ * Preview either with ?strip=a or ?strip=c in the address.
+ */
 export function GuestStrip() {
   const me = useMe();
   const [hidden, setHidden] = useState(true);
+  const [look, setLook] = useState<"a" | "c">("a");
 
   useEffect(() => {
     let dismissed = false;
     try { dismissed = localStorage.getItem(DISMISSED_KEY) === "1"; } catch {}
-    const id = requestAnimationFrame(() => setHidden(dismissed));
+    const wanted = new URLSearchParams(window.location.search).get("strip");
+    const id = requestAnimationFrame(() => {
+      /* ?strip=… is for comparing looks, so it always shows the note */
+      setHidden(dismissed && !wanted);
+      if (wanted === "c" || wanted === "a") setLook(wanted);
+    });
     return () => cancelAnimationFrame(id);
   }, []);
 
   if (hidden || !me?.enabled || me.user) return null;
-  return <div className="guest-strip" role="note">
+  const close = () => { setHidden(true); try { localStorage.setItem(DISMISSED_KEY, "1"); } catch {} };
+
+  if (look === "c") {
+    return <div className="guest-note" role="note">
+      <svg width="46" height="34" viewBox="0 0 46 34" fill="none" aria-hidden="true"><path d="M4 30c10-2 26-8 34-24m-9 1 9-2 1 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <span>sign in to start <br />your own jar</span>
+      <button className="note-close" aria-label="Dismiss" onClick={close}>×</button>
+    </div>;
+  }
+  return <div className="guest-pill" role="note">
     <span><span className="strip-long">You’re looking at a sample jar. Sign in to start your own.</span><span className="strip-short">Sample jar. Sign in to start yours.</span></span>
-    <button className="strip-close" aria-label="Dismiss" onClick={() => { setHidden(true); try { localStorage.setItem(DISMISSED_KEY, "1"); } catch {} }}>×</button>
+    <button className="strip-close" aria-label="Dismiss" onClick={close}>×</button>
   </div>;
 }

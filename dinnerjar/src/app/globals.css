@@ -57,7 +57,11 @@ svg { flex-shrink: 0; }
 .account-email { padding: 8px 10px; font-size: 12px; color: var(--ink-soft); word-break: break-all; }
 .account-popup button { display: block; width: 100%; text-align: left; background: none; padding: 8px 10px; border-radius: 8px; font-size: 13px; color: var(--ink); }
 .account-popup button:hover { background: var(--butter); }
-.guest-strip { width: calc(100% - 96px); max-width: 1180px; margin: 10px auto 0; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f6f1d6; border: 1px solid var(--line); border-radius: 12px; padding: 9px 14px; font-size: 13px; color: var(--ink-soft); }
+.guest-pill { position: relative; z-index: 1; width: fit-content; max-width: calc(100% - 32px); margin: 14px auto 26px; display: flex; align-items: center; gap: 8px; background: #f6f1d6; border-radius: 999px; padding: 5px 8px 5px 16px; font-size: 13px; color: var(--ink-soft); }
+.guest-note { position: relative; z-index: 2; width: calc(100% - 96px); max-width: 1180px; height: 0; margin: 0 auto; }
+.guest-note > svg { position: absolute; right: 22px; top: 4px; color: #8a7a4c; }
+.guest-note > span { position: absolute; right: 72px; top: 30px; text-align: right; font-family: var(--font-handwriting), cursive; font-size: 18px; line-height: 1.25; color: #8a7a4c; white-space: nowrap; }
+.note-close { position: absolute; right: -4px; top: 44px; background: none; color: #b5a878; font-size: 18px; line-height: 1; padding: 0 4px; }
 .strip-short { display: none; }
 .strip-close { background: none; color: #9a8f70; font-size: 20px; line-height: 1; padding: 0 4px; }
 .collection-button { display: flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px 8px 14px; font-size: 13px; font-weight: 500; transition: transform .2s, box-shadow .2s; }
@@ -279,7 +283,11 @@ svg { flex-shrink: 0; }
   .collection-button { gap: 6px; }
   .signin-button { font-size: 12px; padding: 6px 11px; }
   .avatar-button { width: 28px; height: 28px; }
-  .guest-strip { width: calc(100% - 32px); font-size: 12px; }
+  .guest-pill { position: relative; z-index: 1; width: fit-content; max-width: calc(100% - 32px); margin: 14px auto 26px; display: flex; align-items: center; gap: 8px; background: #f6f1d6; border-radius: 999px; padding: 5px 8px 5px 16px; font-size: 13px; color: var(--ink-soft); }
+.guest-note { position: relative; z-index: 2; width: calc(100% - 96px); max-width: 1180px; height: 0; margin: 0 auto; }
+.guest-note > svg { position: absolute; right: 18px; top: 2px; color: #8a7a4c; transform: scaleY(-1) rotate(-12deg); }
+.guest-note > span { position: absolute; right: 70px; top: 22px; text-align: right; font-family: var(--font-handwriting), cursive; font-size: 18px; line-height: 1.25; color: #8a7a4c; white-space: nowrap; }
+.note-close { position: absolute; right: -4px; top: 44px; background: none; color: #b5a878; font-size: 18px; line-height: 1; padding: 0 4px; }
   .strip-long { display: none; }
   .strip-short { display: inline; }
   .brand, .collection-button { white-space: nowrap; }
@@ -323,3 +331,11 @@ svg { flex-shrink: 0; }
 .recipe-hit { border-radius: 4px; }
 .recipe-hit:hover { background: rgba(68,86,58,.06); }
 .recipe-hit:focus-visible { outline: 2px solid var(--green-dark); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .guest-note { width: calc(100% - 32px); height: 40px; }
+  .guest-note > svg { right: 8px; top: 0; width: 34px; height: 26px; }
+  .guest-note > span { right: 52px; top: 6px; font-size: 15px; }
+  .guest-note > span br { display: none; }
+  .note-close { top: 8px; right: -6px; }
+}
