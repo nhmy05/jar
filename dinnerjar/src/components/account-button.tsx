@@ -48,7 +48,7 @@ export function AccountButton({ disabled, onShare }: { disabled?: boolean; onSha
     <button className="avatar-button" onClick={() => setOpen((value) => !value)} aria-haspopup="menu" aria-expanded={open} aria-label="Your account">{initial}</button>
     {open && <div className="account-popup" role="menu">
       {me.user.email && <div className="account-email">{me.user.email}</div>}
-      {onShare && <button role="menuitem" onClick={() => { setOpen(false); onShare(); }}>Share links</button>}
+      {onShare && <button role="menuitem" onClick={() => { setOpen(false); onShare(); }}>Share jar</button>}
       <button role="menuitem" onClick={() => void signOut({ callbackUrl: "/" })}>Sign out</button>
     </div>}
   </div>;
