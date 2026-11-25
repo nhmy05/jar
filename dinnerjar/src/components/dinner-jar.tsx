@@ -293,7 +293,7 @@ export function DinnerJar({ jarKey }: { jarKey?: string }) {
         <button className="button button-primary" onClick={() => void pickDish()}><Icon name="shuffle" size={17} />Pick another</button>
       </div>
     </Dialog>}
-    {modal === "share" && <Dialog key="share" labelId="share-title" onClose={closeModal} className="share-dialog"><ShareDialog jarKey={jarKey} onDone={closeModal} /></Dialog>}
+    {modal === "share" && <Dialog key="share" labelId="share-title" onClose={closeModal} className="share-dialog"><ShareDialog jarKey={jarKey} /></Dialog>}
     {modal === "help" && <Dialog key="help" labelId="help-title" onClose={closeModal} className="help-dialog">
       <h2 id="help-title">How the jar works</h2>
       <ol className="help-steps">

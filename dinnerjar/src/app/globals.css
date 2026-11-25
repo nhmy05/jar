@@ -335,13 +335,15 @@ svg { flex-shrink: 0; }
 }
 
 .share-dialog { width: 520px; }
-.share-access { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
-.share-access label { font-size: 13px; font-weight: 600; color: #656e54; }
-.share-access select { min-height: 40px; padding: 0 34px 0 14px; border: 1px solid #dedfca; border-radius: 999px; font: inherit; font-size: 13px; color: var(--ink); appearance: none; background: #fffefa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%23656e54' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 13px center; cursor: pointer; }
-.share-help { margin: 6px 0 14px; font-size: 12.5px; line-height: 1.5; color: #8b8c77; min-height: 38px; }
-.share-row-link { display: flex; gap: 8px; }
-.share-row-link input { flex: 1; min-width: 0; min-height: 42px; padding: 0 12px; border: 1px solid #dedfca; border-radius: 9px; background: #fffefa; font-size: 12.5px; color: var(--ink); }
-.share-reset { margin-top: 10px; }
-.share-done { margin-top: 24px; }
-.share-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; font-size: 12.5px; color: #95603f; }
+.share-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border: 0; padding: 0; margin: 0 0 20px; }
+.share-card { position: relative; display: grid; align-content: start; gap: 4px; padding: 14px; border: 1.5px solid #e3e4d2; border-radius: 12px; background: #fffefa; cursor: pointer; }
+.share-card input { position: absolute; opacity: 0; pointer-events: none; }
+.share-card strong { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.share-card span { font-size: 12px; line-height: 1.45; color: #8b8c77; }
+.share-card:has(input:checked) { border-color: var(--green); background: #f1f3e6; }
+.share-card:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 2px; }
+.share-fallback { width: 100%; min-height: 42px; margin-bottom: 12px; padding: 0 12px; border: 1px solid #dedfca; border-radius: 9px; background: #fffefa; font-size: 12.5px; color: var(--ink); }
+.share-copy { width: 100%; }
+.share-reset { display: flex; margin: 14px auto 0; }
+.share-confirm { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-top: 14px; text-align: center; font-size: 12.5px; color: #95603f; }
 .share-confirm span { flex: 1 1 100%; }

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export type IconName = "plus" | "close" | "book" | "shuffle" | "back" | "image" | "link" | "search" | "arrow" | "sparkle" | "heart" | "leaf" | "check" | "external" | "upload" | "refresh" | "trash";
+export type IconName = "plus" | "close" | "book" | "shuffle" | "back" | "image" | "link" | "search" | "arrow" | "sparkle" | "heart" | "leaf" | "check" | "external" | "eye" | "edit" | "upload" | "refresh" | "trash";
 
 export function Icon({ name, size = 20, className = "", style }: { name: IconName; size?: number; className?: string; style?: CSSProperties }) {
   const paths: Record<IconName, React.ReactNode> = {
@@ -17,6 +17,8 @@ export function Icon({ name, size = 20, className = "", style }: { name: IconNam
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />,
     leaf: <><path d="M20 3C10 2 3 8 5 15c2 7 14 6 15-12ZM3 22l13-15M7 17l-1-5M11 13l5 1" /></>,
     check: <path d="m5 12 4 4L19 6" />,
+    eye: <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="2.8" /></>,
+    edit: <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4ZM13.5 6.5l4 4" />,
     external: <><path d="M14 3h7v7M21 3 10 14M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5" /></>,
     upload: <><path d="M12 16V3M7 8l5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" /></>,
     refresh: <><path d="M20 7A9 9 0 1 0 21 14M20 3v5h-5" /></>,
