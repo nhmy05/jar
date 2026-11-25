@@ -11,7 +11,7 @@ import { NoteName } from "@/components/note-name";
 import { JarView } from "@/components/jar-view";
 import { Dialog } from "@/components/dialog";
 import { ShareDialog } from "@/components/share-dialog";
-import { AccountButton, GuestStrip } from "@/components/account-button";
+import { AccountButton } from "@/components/account-button";
 import { DishForm, type NewDish } from "@/components/dish-form";
 import { DishCollection } from "@/components/dish-collection";
 import { Doodles, JarLogo } from "@/components/doodles";
@@ -240,7 +240,7 @@ export function DinnerJar({ jarKey }: { jarKey?: string }) {
         <AccountButton disabled={isBusy} onShare={isOwner ? () => setModal("share") : undefined} />
       </nav>
     </header>
-    <GuestStrip />
+    {/* <GuestStrip /> returns with step E: until then there is no "your own jar" to sign in for */}
 
     <main className="main-scene">
       <section className="hero" aria-labelledby="hero-title">

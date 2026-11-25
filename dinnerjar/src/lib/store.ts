@@ -209,14 +209,19 @@ async function readAccounts(): Promise<AccountsFile> {
   try {
     const data = JSON.parse(await fs.readFile(ACCOUNTS_FILE, "utf8")) as Partial<AccountsFile>;
     return { users: data.users ?? [], owners: data.owners ?? {}, links: data.links ?? [], members: data.members ?? [] };
-  } catch {
+  } catch (error) {
+    /* only a missing file means "empty": any other problem must not end with the records being overwritten */
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     return { users: [], owners: {}, links: [], members: [] };
   }
 }
 
 async function writeAccounts(data: AccountsFile) {
   await fs.mkdir(path.dirname(ACCOUNTS_FILE), { recursive: true });
-  await fs.writeFile(ACCOUNTS_FILE, JSON.stringify(data));
+  /* write beside it, then swap in one step, so a reader never sees a half-written file */
+  const temp = `${ACCOUNTS_FILE}.${randomUUID()}.tmp`;
+  await fs.writeFile(temp, JSON.stringify(data));
+  await fs.rename(temp, ACCOUNTS_FILE);
 }
 
 function fileStore(): DishStore {

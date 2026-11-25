@@ -2,7 +2,7 @@
 
 *Can't decide? Ask the jar.* Write dishes you've cooked and loved on paper slips, fold them into a glass jar, and pull one out at random whenever you need a cooking idea.
 
-Live: https://jar-blond.vercel.app
+Live: https://magicjar.vercel.app
 
 ## How it works
 - **Add:** write a dish name, optionally add a photo and a recipe link. The note folds twice and drops into the jar.
