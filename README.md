@@ -18,7 +18,7 @@ cd dinnerjar
 npm install
 npm run dev -- --port 3457
 ```
-With no `DATABASE_URL`, dishes are saved to `.data/jars.json`. To use Postgres, copy `.env.example` to `.env`, fill in `DATABASE_URL`, and run `npm run db:push`. Set `OWNER_KEY` to any secret, then open `/owner/<OWNER_KEY>` once on a device to get the remove buttons.
+With no `DATABASE_URL`, dishes are saved to `.data/jars.json`. To use Postgres, copy `.env.example` to `.env`, fill in `DATABASE_URL`, and run `npm run db:push`. To get the remove buttons, set up Google sign-in (the `AUTH_*` values) and `OWNER_EMAIL`, then sign in with that email.
 
 ## Design files
 Mockups and motion studies are in `design-refs/`.
