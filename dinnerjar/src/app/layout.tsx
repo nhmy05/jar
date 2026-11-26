@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { DM_Sans, DM_Serif_Display, Shantell_Sans } from "next/font/google";
+import "./fonts.css";
 import "./globals.css";
 
-const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
-const serif = DM_Serif_Display({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif", display: "swap" });
-/* handwriting for dish names; has Vietnamese accents */
-const handwriting = Shantell_Sans({ subsets: ["latin", "vietnamese"], weight: ["400", "500", "600"], variable: "--font-handwriting", display: "swap" });
+/* fetched early, so text and notes don't wait for them */
+const preloadFonts = ["dm-sans-v17-latin", "dm-serif-display-v17-latin", "dm-serif-display-v17-latin-italic", "shantell-sans-v13-latin"];
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3457"),
@@ -23,8 +21,11 @@ export const viewport: Viewport = { themeColor: "#FDFAE9" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable} ${handwriting.variable}`}>
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        {preloadFonts.map((name) => <link key={name} rel="preload" href={`/fonts/${name}.woff2`} as="font" type="font/woff2" crossOrigin="anonymous" />)}
+        {children}
+      </body>
     </html>
   );
 }
